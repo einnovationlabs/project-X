@@ -1,13 +1,13 @@
 init:
-	pip3 install -r backend/requirements.txt
-	touch backend/.env
+	pip3 install -r main/requirements.txt
+	touch main/.env
 .PHONY: init
 
 start:
-	python3 backend/manage.py runserver
+	python3 main/manage.py runserver
 .PHONY: start
 
 migrate:
-	python3 backend/manage.py makemigrations
-	python3 backend/manage.py migrate
+	python3 main/manage.py makemigrations
+	python3 main/manage.py migrate
 .PHONY: migrate
