@@ -1,13 +1,14 @@
-import logo from './logo.svg';
 import './App.css';
+import  DatasetPage  from "./components/Data/DatasetPage.js"
 
-function App() {
+const App = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
         <p>
           Welcome to Project X
+
+          <DatasetPage/>
         </p>
       </header>
     </div>
