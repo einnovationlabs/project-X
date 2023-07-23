@@ -11,6 +11,18 @@ class User(models.Model):
     email = models.EmailField()
     phone_number = models.CharField(max_length=50)
     profile_pic = models.CharField(max_length=100, blank=True, null= True)
+    is_active = models.BooleanField(default= True)
+
+
+    def serialize(self):
+
+        return {
+            "firstname" : self.firstname,
+            "lastname" : self.lastname,
+            "username" : self.username,
+            "email" : self.email,
+            "is_active" : self.is_active
+        }
 
 
 

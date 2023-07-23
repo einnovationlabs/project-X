@@ -1,44 +1,42 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from user.models import User
-import crud
+import user.crud as crud
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.http import JsonResponse
 
 # Create your views here.
 
 def home(request):
     return HttpResponse('Hello world')
 
-
+@csrf_exempt
 def create_user(request):
 
-    body = request.data
+    data = json.loads(request.body)
 
     # perform validation
-    user = crud.create_user(body)
+    user = crud.create_user(data)
     
-    return HttpResponse(user)
-
-def delete_user(request, id):
-    user = User.objects.get(id = id)
-    user.delete()
+    return JsonResponse(user.serialize())
 
 
-def update_user(request, id):
-    body = request.data
-    user = User.objects.get(id = id)
-    user.firstname = body.get('firstname')
-    user.lastname = body.get('lastname')
-    user.username = body.get('username')
-    user.password = body.get('password')
-    user.about = body.get('about')
-    user.email = body.get('email']
-    user.phone_number = body.get('phone_number']
-    user.profile_pic = body.get('profile_pic']
+@csrf_exempt
+def delete_user(request, user_id):
+    user = crud.delete_user(user_id)
+    return JsonResponse(user.serialize())
 
-    user.save()
-    return user
 
-def get_user(request):
-    user = User.objects.get(id = id)
-    return HttpResponse(user)
+@csrf_exempt
+def update_user(request, user_id):
+    data = json.loads(request.body)
+    user = crud.update_user(user_id, data)
+    return JsonResponse(user.serialize())
+
+
+@csrf_exempt
+def get_user(request, user_id):
+    user = User.objects.get(id = user_id)
+    return JsonResponse(user.serialize())
 
