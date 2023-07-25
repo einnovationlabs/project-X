@@ -38,7 +38,7 @@ class Dataset(models.Model):
     Dataset model
     """
     is_publish = models.BooleanField(default= True)
-    metadata_file = models.URLField()
+    metadata_file = models.URLField(null=True)
     date_created = models.DateField( auto_now_add=True)
     date_modified = models.DateField(auto_now=True)
     metadata_title = models.CharField(max_length= 100)  # create 1:1 table for metadata and dataset
