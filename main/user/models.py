@@ -37,7 +37,7 @@ class Dataset(models.Model):
     """
     Dataset model
     """
-    is_publish = models.BooleanField(default= True)
+    is_published = models.BooleanField(default= True)
     metadata_file = models.URLField(null=True)
     date_created = models.DateField( auto_now_add=True)
     date_modified = models.DateField(auto_now=True)
@@ -49,8 +49,10 @@ class Dataset(models.Model):
     maintainer = models.CharField(max_length=100)  # user or org or Admin ?
     license_link = models.URLField()
     is_government = models.BooleanField()
-    is_public = models.BooleanField()
+    is_public = models.BooleanField(default=False)
     csv_data_file = models.URLField()
+    is_archived = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
 
 
 
@@ -108,7 +110,6 @@ class User(models.Model):
 
     datasets_ids = models.ManyToManyField(to=Dataset, related_name="datasets")  #many to many
     organizations_ids = models.ManyToManyField(to = Organization, related_name = "organizations")  #many to many
-    # tags_ids = models.# one to many
 
     PROFILE = "PRF"
     ORG_CONTRIBUTOR = "OCR"

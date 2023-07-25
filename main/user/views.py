@@ -8,9 +8,11 @@ from django.http import JsonResponse
 
 # Create your views here.
 
+# Test endpoint
 def home(request):
     return HttpResponse('Hello world')
 
+# User Management Endpoints
 @csrf_exempt
 def create_user(request):
     """
@@ -51,6 +53,20 @@ def get_user(request, user_id):
     user = User.objects.get(id = user_id)
     return JsonResponse(user.serialize())
 
+
+@csrf_exempt
+def user_login(request):
+    """
+    Endpoint to login user
+    """
+
+@csrf_exempt
+def user_logout(request):
+    """
+    Endpoint to logout user
+    """
+
+# Organization Management endpoints
 @csrf_exempt
 def create_org(request):
     """
@@ -75,6 +91,8 @@ def get_org(request, org_id):
     Endpoint to get organization by id
     """
 
+
+##### DATASETS ENDPOINTS #####
 @csrf_exempt
 def create_dataset(request):
     """
@@ -98,3 +116,36 @@ def get_dataset(request, dataset_id):
     """
     Endpoint to get dataset by id
     """
+
+@csrf_exempt
+def get_all_datasets(request):
+    """
+    Endpoint to get all datasets
+    """
+
+# Search and Filtering Endpoints
+@csrf_exempt
+def search_dataset_by_category(request):
+    """
+    Endpoint to search datasets by category
+    """
+
+@csrf_exempt
+def filter_dataset_by_source(request):
+    """
+    Endpoint to filter datasets by source
+    """
+
+@csrf_exempt
+def filter_dataset_by_date_range(request):
+    """
+    Endpoint to filter datasets by date range
+    """
+# Data Submission Endpoints
+# Visualization Endpoints
+# Data Download and Export Endpoints
+
+# Data Submission Endpoints
+# Visualization Endpoints
+# Data Download and Export Endpoints
+# Search and Filtering Endpoints
