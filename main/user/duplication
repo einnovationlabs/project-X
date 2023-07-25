@@ -1,0 +1,23 @@
+@csrf_exempt
+def create_dataset(request):
+    """
+    Endpoint to create dataset
+    """
+
+@csrf_exempt
+def delete_dataset(request, dataset_id):
+    """
+    Endpoint to delete dataset by id
+    """
+
+@csrf_exempt
+def update_dataset(reques, dataset_id):
+    """
+    Endpoint to update dataset by id
+    """
+
+@csrf_exempt
+def get_dataset(request, dataset_id):
+    """
+    Endpoint to get dataset by id
+    """
