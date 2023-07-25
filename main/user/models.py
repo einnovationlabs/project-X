@@ -2,12 +2,43 @@ from django.db import models
 
 # Create your models here.
 
+class Dataset_File(models.Model):
+    """
+    Dataset File model
+    """
+    file_url = models.URLField()
+    user = models.ForeignKey(
+        "User",
+        related_name="dataset_files",
+        on_delete=models.RESTRICT
+    )
+
+class Dataset_Additional_Info(models.Model):
+    """
+    Dataset Additional Info model
+    """
+    title = models.CharField(max_length=50)
+    data = models.TextField()
+    dataset = models.ForeignKey(
+        "Dataset",
+        related_name="dataset_additional_infos",
+        on_delete=models.RESTRICT
+    )
+
+
+# class Dataset_Tag(models.Model):
+#     """
+#     Dataset Tag model
+#     """
+#     name = models.CharField(max_length=50)
+#     user_id = 
 
 class Dataset(models.Model):
     """
     Dataset model
     """
     is_publish = models.BooleanField(default= True)
+    metadata_file = models.URLField()
     date_created = models.DateField( auto_now_add=True)
     date_modified = models.DateField(auto_now=True)
     metadata_title = models.CharField(max_length= 100)  # create 1:1 table for metadata and dataset
@@ -19,9 +50,12 @@ class Dataset(models.Model):
     license_link = models.URLField()
     is_government = models.BooleanField()
     is_public = models.BooleanField()
-    #tags = models # from frontend? thinking of many many relation for backend
-    csv_data_file = models.CharField(max_length=100)
-    #other_data_files =  # thinking of many to many relation
+    csv_data_file = models.URLField()
+
+
+
+
+    # tags = models.OneToMany(to = Dataset_Tag) # from frontend? thinking of many many relation for backend
 
 
 class Organization(models.Model):
@@ -37,6 +71,7 @@ class Organization(models.Model):
     password = models.CharField(max_length= 50)
     description = models.CharField(max_length= 1000, blank= True, null= True)
     is_active = models.BooleanField(default= True)
+    # organization_admin = 
 
 
     def serialize(self):
@@ -69,9 +104,11 @@ class User(models.Model):
     profile_pic = models.CharField(max_length=100, blank=True, null= True)
     background_pic = models.CharField(max_length=100, blank=True, null= True)
     is_active = models.BooleanField(default= True)
+
+
     datasets_ids = models.ManyToManyField(to=Dataset, related_name="datasets")  #many to many
     organizations_ids = models.ManyToManyField(to = Organization, related_name = "organizations")  #many to many
-    tags_ids = # one to many
+    # tags_ids = models.# one to many
 
     PROFILE = "PRF"
     ORG_CONTRIBUTOR = "OCR"
@@ -101,13 +138,11 @@ class User(models.Model):
             "email" : self.email,
             "is_active" : self.is_active
         }
-
-
     
 
-
-
-
+class UserOrganization(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.RESTRICT)
+    user = models.ForeignKey(User, on_delete=models.RESTRICT)
 
 
 
