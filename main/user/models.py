@@ -2,94 +2,79 @@ from django.db import models
 
 # Create your models here.
 
+class Dataset(models.Model):
+    """
+    Dataset model
+    """
+    is_verified = models.BooleanField(default= False)
+    has_user_policy = models.BooleanField(default=False)
+    is_government = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=True)
+
+    status = models.TextField()  #make it choices
+
+    addt_info = models.TextField()
+
+    number_of_likes = models.IntegerField()
+    is_deleted = models.BooleanField(default=False)
+
+    owner_organization = models.ForeignKey("Organization", on_delete=models.RESTRICT)
+    owner_user = models.ForeignKey("User", on_delete=models.RESTRICT)
+
+
+
 class Dataset_File(models.Model):
     """
     Dataset File model
     """
     file_url = models.URLField()
-    user = models.ForeignKey(
-        "User",
-        related_name="dataset_files",
-        on_delete=models.RESTRICT
-    )
 
-class Dataset_Additional_Info(models.Model):
+
+class Dataset_Addt_File(models.Model):
     """
     Dataset Additional Info model
     """
     title = models.CharField(max_length=50)
     data = models.TextField()
-    dataset = models.ForeignKey(
-        "Dataset",
-        related_name="dataset_additional_infos",
+
+    dataset_file = models.ForeignKey(
+        "Dataset_File",
         on_delete=models.RESTRICT
     )
 
 
-# class Dataset_Tag(models.Model):
-#     """
-#     Dataset Tag model
-#     """
-#     name = models.CharField(max_length=50)
-#     user_id = 
+class Dataset_Tag(models.Model):
+    """
+    Dataset Tag model
+    """
 
-class Dataset(models.Model):
+
+class Dataset_Comment(models.Model):
     """
-    Dataset model
+    Dataset Comment model
     """
-    is_published = models.BooleanField(default= True)
+    dataset = models.ForeignKey("Dataset", on_delete=models.RESTRICT)
+    user = models.ForeignKey("User", on_delete=models.RESTRICT)
+
+    body = models.TextField()
+
+
+class Dataset_Metadata(models.Model):
+    """
+    Dataset Metadata model
+    """
+    dataset = models.OneToOneField(Dataset, on_delete=models.RESTRICT)
+
     metadata_file = models.URLField(null=True)
-    date_created = models.DateField( auto_now_add=True)
-    date_modified = models.DateField(auto_now=True)
-    metadata_title = models.CharField(max_length= 100)  # create 1:1 table for metadata and dataset
+    metadata_title = models.CharField(max_length= 100)  
     metadata_blurb = models.CharField(max_length= 1000, blank= True, null= True)
     metadata_source_link = models.URLField()
     metadata_resource_type = models.CharField(max_length=50)
     publisher = models.CharField(max_length=100)  # user or org or Admin ?
     maintainer = models.CharField(max_length=100)  # user or org or Admin ?
     license_link = models.URLField()
-    is_government = models.BooleanField()
-    is_public = models.BooleanField(default=False)
-    csv_data_file = models.URLField()
-    is_archived = models.BooleanField(default=False)
-    is_deleted = models.BooleanField(default=False)
-
-
-
-
-    # tags = models.OneToMany(to = Dataset_Tag) # from frontend? thinking of many many relation for backend
-
-
-class Organization(models.Model):
-    """
-    Organization model
-    """
-    organization_name = models.CharField(max_length= 100)
-    location = models.CharField(max_length= 100)
-    address = models.CharField(max_length= 100)
-    phone_number = models.CharField(max_length=50)
-    category = models.CharField(max_length= 100)
-    email = models.EmailField()
-    password = models.CharField(max_length= 50)
-    description = models.CharField(max_length= 1000, blank= True, null= True)
-    is_active = models.BooleanField(default= True)
-    # organization_admin = 
-
-
-    def serialize(self):
-        """
-        Serializes Organization object
-        """
-        return {
-            "organization name" : self.organization_name,
-            "phone_number" : self.phone_number,
-            "description" : self.description,
-            "category" : self.category,
-            "email" : self.email,
-            "location" : self.location,
-            "address" : self.address,
-            "is_active" : self.is_active
-        }
+    date_created = models.DateField( auto_now_add=True)
+    date_modified = models.DateField(auto_now=True)
 
 
 class User(models.Model):
@@ -106,10 +91,6 @@ class User(models.Model):
     profile_pic = models.CharField(max_length=100, blank=True, null= True)
     background_pic = models.CharField(max_length=100, blank=True, null= True)
     is_active = models.BooleanField(default= True)
-
-
-    datasets_ids = models.ManyToManyField(to=Dataset, related_name="datasets")  #many to many
-    organizations_ids = models.ManyToManyField(to = Organization, related_name = "organizations")  #many to many
 
     PROFILE = "PRF"
     ORG_CONTRIBUTOR = "OCR"
@@ -141,12 +122,91 @@ class User(models.Model):
         }
     
 
-class UserOrganization(models.Model):
+class User_Profile(models.Model):
+    """
+    User profile model
+    """
+    user = models.OneToOneField(User, unique=True, on_delete=models.RESTRICT)
+
+
+
+class User_Role(models.Model):
+    """
+    User role model
+    """
+
+
+class Organization(models.Model):
+    """
+    Organization model
+    """
+    organization_name = models.CharField(max_length= 100)
+    location = models.CharField(max_length= 100)
+    address = models.CharField(max_length= 100)
+    phone_number = models.CharField(max_length=50)
+    category = models.CharField(max_length= 100)
+    email = models.EmailField()
+    password = models.CharField(max_length= 50)
+    description = models.CharField(max_length= 1000, blank= True, null= True)
+    is_active = models.BooleanField(default= True)
+    org_admin_id = models.ManyToManyField(User, through="Organization_AdminUser")
+
+
+    def serialize(self):
+        """
+        Serializes Organization object
+        """
+        return {
+            "organization name" : self.organization_name,
+            "phone_number" : self.phone_number,
+            "description" : self.description,
+            "category" : self.category,
+            "email" : self.email,
+            "location" : self.location,
+            "address" : self.address,
+            "is_active" : self.is_active
+        }
+
+
+class Organization_Category(models.Model):
+    """
+    Organization Category model
+    """
+
+
+class Organization_Profile(models.Model):
+    """
+    Organization Profile model
+    """
+    organization = models.OneToOneField(Organization, unique=True, on_delete=models.RESTRICT)
+
+
+class Organization_AdminUser(models.Model):
+    org_admin_id = models.ForeignKey(Organization, on_delete=models.RESTRICT)
+    user_id = models.ForeignKey(User, on_delete=models.RESTRICT)
+
+    # Add any extra fields or attributes you want for this relationship
+    # extra_field = models.CharField(max_length=100)
+
+
+class Dataset_DatasetFile(models.Model):
+    dataset = models.ForeignKey(Dataset, on_delete=models.RESTRICT)
+    dataset_file = models.ForeignKey(Dataset_File, on_delete=models.RESTRICT)
+
+
+class Dataset_DatasetTag(models.Model):
+    dataset = models.ForeignKey(Dataset, on_delete=models.RESTRICT)
+    dataset_tag = models.ForeignKey(Dataset_Tag, on_delete=models.RESTRICT)
+
+
+class Organization_OrganizationCategory(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.RESTRICT)
+    organization_category = models.ForeignKey(Organization_Category, on_delete=models.RESTRICT)
+
+
+class User_UserRole(models.Model):
     user = models.ForeignKey(User, on_delete=models.RESTRICT)
-
-
-
+    user_role = models.ForeignKey(User_Role, on_delete=models.RESTRICT)
 
 
 
