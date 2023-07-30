@@ -41,13 +41,13 @@ def create_dataset(dataset_data):
         tag.save()
 
     dataset_metadata = Dataset_Metadata(
-            metadata_file = dataset_data.get("metadata").get("metadata_file")
-            metadata_title = dataset_data.get("metadata").get("metadata_title")
-            metadata_blurb = dataset_data.get("metadata").get("metadata_blurb")
-            metadata_source_link = dataset_data.get("metadata").get("metadata_source_link")
-            metadata_resource_type = dataset_data.get("metadata").get("metadata_resource_type")
-            publisher = dataset_data.get("metadata").get("publisher")
-            maintainer = dataset_data.get("metadata").get("maintainer")
+            metadata_file = dataset_data.get("metadata").get("metadata_file"),
+            metadata_title = dataset_data.get("metadata").get("metadata_title"),
+            metadata_blurb = dataset_data.get("metadata").get("metadata_blurb"),
+            metadata_source_link = dataset_data.get("metadata").get("metadata_source_link"),
+            metadata_resource_type = dataset_data.get("metadata").get("metadata_resource_type"),
+            publisher = dataset_data.get("metadata").get("publisher"),
+            maintainer = dataset_data.get("metadata").get("maintainer"),
             license_link = dataset_data.get("metadata").get("license_link")
     )
     dataset_metadata.save()
