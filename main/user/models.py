@@ -47,6 +47,7 @@ class Dataset_Tag(models.Model):
     """
     Dataset Tag model
     """
+    name = models.CharField(max_length=50)
 
 
 class Dataset_Comment(models.Model):
@@ -81,34 +82,10 @@ class User(models.Model):
     """
     User model
     """
-    username = models.CharField(max_length = 100)
-    password = models.CharField(max_length= 50)
-    firstname = models.CharField(max_length= 100)
-    lastname = models.CharField(max_length= 100)
-    about = models.CharField(max_length= 1000, blank= True, null= True)
-    email = models.EmailField()
     phone_number = models.CharField(max_length=50)
     profile_pic = models.CharField(max_length=100, blank=True, null= True)
     background_pic = models.CharField(max_length=100, blank=True, null= True)
     is_active = models.BooleanField(default= True)
-
-    PROFILE = "PRF"
-    ORG_CONTRIBUTOR = "OCR"
-    ORG_ADMIN = "OAD"
-    SUPER_ADMIN = "SAD"
-
-    USER_TYPE_CHOICES = [
-        (PROFILE, "Profile User"),
-        (ORG_CONTRIBUTOR, "Organization Contributor"),
-        (ORG_ADMIN, "Organization Admin"),
-        (SUPER_ADMIN, "Super Admin")
-    ]
-
-    user_type = models.CharField(
-        max_length= 3,
-        choices= USER_TYPE_CHOICES,
-        default= PROFILE
-    )
 
 
     def serialize(self):
@@ -127,13 +104,22 @@ class User_Profile(models.Model):
     User profile model
     """
     user = models.OneToOneField(User, unique=True, on_delete=models.RESTRICT)
-
+    username = models.CharField(max_length = 100)
+    password = models.CharField(max_length= 50)
+    firstname = models.CharField(max_length= 100)
+    lastname = models.CharField(max_length= 100)
+    email = models.EmailField()
+    about = models.CharField(max_length= 1000, blank= True, null= True)
 
 
 class User_Role(models.Model):
     """
     User role model
     """
+    profile_user = models.BooleanField(default= True)
+    org_contributor = models.BooleanField(default=False)
+    org_admin = models.BooleanField(default=False)
+    super_admin = models.BooleanField(default=False)
 
 
 class Organization(models.Model):
