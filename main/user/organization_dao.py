@@ -4,28 +4,39 @@ DAO (Data Access Object) file
 Helper file containing functions for accessing data in our database
 """
 from user.models import Organization
+from user.models import Organization_Profile
+from user.models import Organization_Category
 
 def create_org(org_data):
-
-    org = org(firstname = org_data.get('firstname'), 
-            lastname = org_data.get('lastname'), 
-            orgname = org_data.get('orgname'),
-            password = org_data.get('password'),
-            about = org_data.get('about'),
-            email = org_data.get('email'),
-            phone_number = org_data.get('phone_number'),
-            profile_pic = org_data.get('profile_pic')
-            )
-    
-    
+    """
+    Creates and Returns Organization given org_data
+    """
+    org = Organization()
     org.save()
 
+    org_profile = Organization_Profile(
+            org_name = org_data.get("profile").get('organization_name'), 
+            location = org_data.get("profile").get('location'), 
+            address = org_data.get("profile").get('address'), 
+            phone_number = org_data.get("profile").get('phone_number'), 
+            email = org_data.get("profile").get('email'), 
+            password = org_data.get("profile").get('password'), 
+            description = org_data.get("profile").get('description'), 
+            )
+    org_profile.save()
+
+    org_category = Organization_Category(
+        type = org_data.get("category").get("type")
+    )
+
+    org_category.save()
     return org
 
 
-
 def update_org(org_id, org_data):
-
+    """
+    Updates and Returns Organization given org_id and org_data
+    """
     org = org.objects.get(id = org_id)
 
     org.firstname = org_data.get('firstname')
@@ -43,7 +54,16 @@ def update_org(org_id, org_data):
 
 
 def delete_org(org_id):
+    """
+    Deletes and Returns Organization given org_id
+    """
     org = org.objects.get(id = org_id)
     org.is_active = False
     org.save()
     return org
+
+
+def get_org(org_id):
+    """
+    Retrieves and Returns Organization given org_id
+    """

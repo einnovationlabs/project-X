@@ -1,6 +1,48 @@
 from django.db import models
 
 # Create your models here.
+class User(models.Model):
+    """
+    User model
+    """
+    phone_number = models.CharField(max_length=50)
+    profile_pic = models.CharField(max_length=100, blank=True, null= True)
+    background_pic = models.CharField(max_length=100, blank=True, null= True)
+    is_deleted = models.BooleanField(default= True)
+
+
+    def serialize(self):
+
+        return {
+            "phone_number" : self.phone_number,
+            "profile_picture" : self.profile_pic,
+            "background_picture" : self.background_pic,
+            "is_deleted" : self.is_deleted
+        }
+    
+
+class User_Profile(models.Model):
+    """
+    User profile model
+    """
+    user = models.OneToOneField(User, unique=True, on_delete=models.RESTRICT)
+    username = models.CharField(max_length = 100)
+    password = models.CharField(max_length= 50)
+    firstname = models.CharField(max_length= 100)
+    lastname = models.CharField(max_length= 100)
+    email = models.EmailField()
+    about = models.CharField(max_length= 1000, blank= True, null= True)
+
+
+class User_Role(models.Model):
+    """
+    User role model
+    """
+    profile_user = models.BooleanField(default= True)
+    org_contributor = models.BooleanField(default=False)
+    org_admin = models.BooleanField(default=False)
+    super_admin = models.BooleanField(default=False)
+
 
 class Dataset(models.Model):
     """
@@ -35,7 +77,7 @@ class Dataset_Addt_File(models.Model):
     Dataset Additional Info model
     """
     title = models.CharField(max_length=50)
-    data = models.TextField()
+    file_url = models.URLField()
 
     dataset_file = models.ForeignKey(
         "Dataset_File",
@@ -78,65 +120,10 @@ class Dataset_Metadata(models.Model):
     date_modified = models.DateField(auto_now=True)
 
 
-class User(models.Model):
-    """
-    User model
-    """
-    phone_number = models.CharField(max_length=50)
-    profile_pic = models.CharField(max_length=100, blank=True, null= True)
-    background_pic = models.CharField(max_length=100, blank=True, null= True)
-    is_active = models.BooleanField(default= True)
-
-
-    def serialize(self):
-
-        return {
-            "firstname" : self.firstname,
-            "lastname" : self.lastname,
-            "username" : self.username,
-            "email" : self.email,
-            "is_active" : self.is_active
-        }
-    
-
-class User_Profile(models.Model):
-    """
-    User profile model
-    """
-    user = models.OneToOneField(User, unique=True, on_delete=models.RESTRICT)
-    username = models.CharField(max_length = 100)
-    password = models.CharField(max_length= 50)
-    firstname = models.CharField(max_length= 100)
-    lastname = models.CharField(max_length= 100)
-    email = models.EmailField()
-    about = models.CharField(max_length= 1000, blank= True, null= True)
-
-
-class User_Role(models.Model):
-    """
-    User role model
-    """
-    profile_user = models.BooleanField(default= True)
-    org_contributor = models.BooleanField(default=False)
-    org_admin = models.BooleanField(default=False)
-    super_admin = models.BooleanField(default=False)
-
-
 class Organization(models.Model):
     """
     Organization model
     """
-    organization_name = models.CharField(max_length= 100)
-    location = models.CharField(max_length= 100)
-    address = models.CharField(max_length= 100)
-    phone_number = models.CharField(max_length=50)
-    category = models.CharField(max_length= 100)
-    email = models.EmailField()
-    password = models.CharField(max_length= 50)
-    description = models.CharField(max_length= 1000, blank= True, null= True)
-    is_active = models.BooleanField(default= True)
-    org_admin_id = models.ManyToManyField(User, through="Organization_AdminUser")
-
 
     def serialize(self):
         """
@@ -150,7 +137,7 @@ class Organization(models.Model):
             "email" : self.email,
             "location" : self.location,
             "address" : self.address,
-            "is_active" : self.is_active
+            "is_deleted" : self.is_deleted
         }
 
 
@@ -158,6 +145,7 @@ class Organization_Category(models.Model):
     """
     Organization Category model
     """
+    type = models.CharField(max_length=50)
 
 
 class Organization_Profile(models.Model):
@@ -165,6 +153,14 @@ class Organization_Profile(models.Model):
     Organization Profile model
     """
     organization = models.OneToOneField(Organization, unique=True, on_delete=models.RESTRICT)
+    organization_name = models.CharField(max_length= 100)
+    location = models.CharField(max_length= 100)
+    address = models.CharField(max_length= 100)
+    phone_number = models.CharField(max_length=50)
+    email = models.EmailField()
+    password = models.CharField(max_length= 50)
+    description = models.CharField(max_length= 1000, blank= True, null= True)
+    is_deleted = models.BooleanField(default= True)
 
 
 class Organization_AdminUser(models.Model):
