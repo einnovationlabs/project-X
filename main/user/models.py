@@ -11,15 +11,15 @@ class Dataset(models.Model):
     is_government = models.BooleanField(default=False)
     is_public = models.BooleanField(default=True)
 
-    status = models.TextField()  #make it choices
+    status = models.TextField(default=None)  #make it choices
 
-    addt_info = models.TextField()
+    addt_info = models.TextField(default=None)
 
-    number_of_likes = models.IntegerField()
+    number_of_likes = models.IntegerField(default=0)
     is_deleted = models.BooleanField(default=False)
 
-    owner_organization = models.ForeignKey("Organization", on_delete=models.RESTRICT)
-    owner_user = models.ForeignKey("User", on_delete=models.RESTRICT)
+    owner_organization = models.ForeignKey("Organization", on_delete=models.RESTRICT, default=None)
+    owner_user = models.ForeignKey("User", on_delete=models.RESTRICT, default=None)
 
 
 
