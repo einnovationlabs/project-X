@@ -4,8 +4,8 @@ DAO (Data Access Object) file
 Helper file containing functions for accessing data in our database
 """
 from user.models import User
-from user.models import User_Profile
-from user.models import User_Role
+from user.models import UserProfile
+from user.models import UserRole
 
 def create_user(user_data):
     """
@@ -20,7 +20,7 @@ def create_user(user_data):
     
     user.save()
     
-    user_profile = User_Profile(
+    UserProfile = UserProfile(
         username = user_data.get("profile").get("username"),
         password = user_data.get("profile").get("password"),
         firstname = user_data.get("profile").get("firstname"),
@@ -29,15 +29,15 @@ def create_user(user_data):
         about = user_data.get("profile").get("about")
     )
 
-    user_profile.save()
+    UserProfile.save()
 
-    user_role = User_Role(
+    UserRole = UserRole(
         org_contributor = user_data.get("roles").get("organization_contributor"),
         org_admin = user_data.get("roles").get("organization_admin"),
         super_admin = user_data.get("roles").get("super_admin")
     )
 
-    user_role.save()
+    UserRole.save()
 
     return user
 

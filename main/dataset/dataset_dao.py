@@ -3,11 +3,11 @@ DAO (Data Access Object) file
 
 Helper file containing functions for accessing data in our database
 """
-from user.models import Dataset
-from user.models import Dataset_File
-from user.models import Dataset_Addt_File
-from user.models import Dataset_Tag
-from user.models import Dataset_Metadata
+from dataset.models import Dataset
+from dataset.models import DatasetFile
+from dataset.models import DatasetAddtFile
+from dataset.models import DatasetTag
+from dataset.models import DatasetMetadata
 
 def create_dataset(dataset_data):
     """
@@ -27,20 +27,20 @@ def create_dataset(dataset_data):
     
     dataset.save()
 
-    dataset_file = Dataset_File(
-            file_url = dataset_data.get("dataset_files").get("file_url")
+    DatasetFile = DatasetFile(
+            file_url = dataset_data.get("DatasetFiles").get("file_url")
     )
-    dataset_file.save()
+    DatasetFile.save()
 
-    for dataset_title, url in dataset_data.get("dataset_files").get("addt_files"):
-        dataset_addt_file = Dataset_Addt_File(title = dataset_title, file_url = url)
-        dataset_addt_file.save()
+    for dataset_title, url in dataset_data.get("DatasetFiles").get("addt_files"):
+        DatasetAddtFile = DatasetAddtFile(title = dataset_title, file_url = url)
+        DatasetAddtFile.save()
 
     for tag_name in dataset.get("tags"):
-        tag = Dataset_Tag(name = tag_name)
+        tag = DatasetTag(name = tag_name)
         tag.save()
 
-    dataset_metadata = Dataset_Metadata(
+    dataset_metadata = DatasetMetadata(
             metadata_file = dataset_data.get("metadata").get("metadata_file"),
             metadata_title = dataset_data.get("metadata").get("metadata_title"),
             metadata_blurb = dataset_data.get("metadata").get("metadata_blurb"),
