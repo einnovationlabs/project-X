@@ -4,42 +4,15 @@ DAO (Data Access Object) file
 Helper file containing functions for accessing data in our database
 """
 from dataset.models import Dataset
-from dataset.models import DatasetFile
 from dataset.models import DatasetAddtFile
 from dataset.models import DatasetTag
 from dataset.models import DatasetMetadata
+from user.user_dao import get_user
 
 def create_dataset(dataset_data):
     """
     Creates dataset given dataset_data
     """
-    dataset = Dataset(
-            is_verified = dataset_data.get('is_verified'), 
-            has_user_policy = dataset_data.get('has_user_policy'), 
-            is_government = dataset_data.get('is_government'),
-            is_public = dataset_data.get('is_public'),
-            status = dataset_data.get('status'),
-            addt_info = dataset_data.get('addt_info'),
-            number_of_likes = dataset_data.get('number_of_likes'),
-            profile_pic = dataset_data.get('profile_pic')
-            )
-    
-    
-    dataset.save()
-
-    DatasetFile = DatasetFile(
-            file_url = dataset_data.get("DatasetFiles").get("file_url")
-    )
-    DatasetFile.save()
-
-    for dataset_title, url in dataset_data.get("DatasetFiles").get("addt_files"):
-        DatasetAddtFile = DatasetAddtFile(title = dataset_title, file_url = url)
-        DatasetAddtFile.save()
-
-    for tag_name in dataset.get("tags"):
-        tag = DatasetTag(name = tag_name)
-        tag.save()
-
     dataset_metadata = DatasetMetadata(
             metadata_file = dataset_data.get("metadata").get("metadata_file"),
             metadata_title = dataset_data.get("metadata").get("metadata_title"),
@@ -51,6 +24,31 @@ def create_dataset(dataset_data):
             license_link = dataset_data.get("metadata").get("license_link")
     )
     dataset_metadata.save()
+
+    owner_user = get_user(dataset_data.get("owner_user"))
+    dataset = Dataset(
+            is_verified = dataset_data.get('is_verified'), 
+            has_user_policy = dataset_data.get('has_user_policy'), 
+            is_government = dataset_data.get('is_government'),
+            is_public = dataset_data.get('is_public'),
+            status = dataset_data.get('status'),
+            addt_info = dataset_data.get('addt_info'),
+            number_of_likes = dataset_data.get('number_of_likes'),
+            csv_file_url = dataset_data.get("csv_file_url"),
+            owner_user = owner_user,
+            dataset_metadata = dataset_metadata
+            )
+    
+    dataset.save()
+
+    for dataset_title, url in dataset_data.get("dataset_files"):
+        dataset_addt_file = DatasetAddtFile(title = dataset_title, file_url = url)
+        dataset_addt_file.save()
+
+    for tag_name in dataset_data.get("tags"):
+        tag = DatasetTag(name = tag_name)
+        tag.save()
+        dataset.tags.add(tag)
 
     return dataset
 

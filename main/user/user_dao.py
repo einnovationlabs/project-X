@@ -4,7 +4,6 @@ DAO (Data Access Object) file
 Helper file containing functions for accessing data in our database
 """
 from user.models import User
-from user.models import UserProfile
 from user.models import UserRole
 
 def create_user(user_data):
@@ -14,30 +13,25 @@ def create_user(user_data):
     user = User( 
             phone_number = user_data.get('phone_number'),
             profile_pic = user_data.get('profile_pic'),
-            background_pic = user_data.get("background_pic")
+            background_pic = user_data.get("background_pic"),
+            username = user_data.get("profile").get("username"),
+            password = user_data.get("profile").get("password"),
+            firstname = user_data.get("profile").get("firstname"),
+            lastname = user_data.get("profile").get("lastname"),
+            email = user_data.get("profile").get("email"),
+            about = user_data.get("profile").get("about")
             )
     
     
     user.save()
-    
-    UserProfile = UserProfile(
-        username = user_data.get("profile").get("username"),
-        password = user_data.get("profile").get("password"),
-        firstname = user_data.get("profile").get("firstname"),
-        lastname = user_data.get("profile").get("lastname"),
-        email = user_data.get("profile").get("email"),
-        about = user_data.get("profile").get("about")
-    )
 
-    UserProfile.save()
-
-    UserRole = UserRole(
+    user_role = UserRole(
         org_contributor = user_data.get("roles").get("organization_contributor"),
         org_admin = user_data.get("roles").get("organization_admin"),
         super_admin = user_data.get("roles").get("super_admin")
     )
 
-    UserRole.save()
+    user_role.save()
 
     return user
 

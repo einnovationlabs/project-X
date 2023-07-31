@@ -5,8 +5,7 @@ from django.shortcuts import render
 
 from django.shortcuts import render
 from django.http import HttpResponse
-from user.models import User
-import user.user_dao as user_dao
+import dataset.dataset_dao as dataset_dao
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
@@ -23,6 +22,12 @@ def create_dataset(request):
     """
     Endpoint to create dataset
     """
+    data = json.loads(request.body)
+
+    dataset = dataset_dao.create_dataset(data)
+    
+    return JsonResponse(dataset.serialize())
+
 
 @csrf_exempt
 def delete_dataset(request, dataset_id):
