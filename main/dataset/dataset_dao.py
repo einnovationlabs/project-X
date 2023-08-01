@@ -9,7 +9,7 @@ from dataset.models import DatasetTag
 from dataset.models import DatasetMetadata
 from user.user_dao import get_user
 
-def create_dataset(dataset_data):
+def create_dataset(dataset_data, owner_user_id):
     """
     Creates dataset given dataset_data
     """
@@ -25,7 +25,7 @@ def create_dataset(dataset_data):
     )
     dataset_metadata.save()
 
-    owner_user = get_user(dataset_data.get("owner_user"))
+    owner_user = get_user(owner_user_id)
     dataset = Dataset(
             is_verified = dataset_data.get('is_verified'), 
             has_user_policy = dataset_data.get('has_user_policy'), 
@@ -57,16 +57,30 @@ def update_dataset(dataset_id, dataset_data):
     """
     Updates and returns dataset given dataset_id and dataset_data
     """
-    dataset = dataset.objects.get(id = dataset_id)
+    dataset = Dataset.objects.get(id = dataset_id)
 
-    dataset.firstname = dataset_data.get('firstname')
-    dataset.lastname = dataset_data.get('lastname')
-    dataset.datasetname = dataset_data.get('datasetname')
-    dataset.password = dataset_data.get('password')
-    dataset.about = dataset_data.get('about')
-    dataset.email = dataset_data.get('email')
-    dataset.phone_number = dataset_data.get('phone_number')
-    dataset.profile_pic = dataset_data.get('profile_pic')
+    dataset_metadata = dataset.metadata
+
+    dataset_metadata.metadata_file = dataset_data.get("metadata").get("metadata_file")
+    dataset_metadata.metadata_title = dataset_data.get("metadata").get("metadata_title")
+    dataset_metadata.metadata_blurb = dataset_data.get("metadata").get("metadata_blurb")
+    dataset_metadata.metadata_source_link = dataset_data.get("metadata").get("metadata_source_link")
+    dataset_metadata.metadata_resource_type = dataset_data.get("metadata").get("metadata_resource_type")
+    dataset_metadata.publisher = dataset_data.get("metadata").get("publisher")
+    dataset_metadata.maintainer = dataset_data.get("metadata").get("maintainer")
+    dataset_metadata.license_link = dataset_data.get("metadata").get("license_link")
+
+    dataset_metadata.save()
+
+
+    dataset.is_verified = dataset_data.get('is_verified')
+    dataset.has_user_policy = dataset_data.get('has_user_policy')
+    dataset.is_government = dataset_data.get('is_government')
+    dataset.is_public = dataset_data.get('is_public')
+    dataset.status = dataset_data.get('status')
+    dataset.addt_info = dataset_data.get('addt_info')
+    dataset.number_of_likes = dataset_data.get('number_of_likes')
+    dataset.csv_file_url = dataset_data.get("csv_file_url")
 
     dataset.save()
 
@@ -74,9 +88,10 @@ def update_dataset(dataset_id, dataset_data):
 
 
 def delete_dataset(dataset_id):
-    dataset = dataset.objects.get(id = dataset_id)
-    dataset.is_active = False
+    dataset = Dataset.objects.get(id = dataset_id)
+    dataset.is_deleted = True
     dataset.save()
+
     return dataset
 
 
@@ -86,3 +101,20 @@ def get_dataset(dataset_id):
     """
     dataset = Dataset.objects.get(id = dataset_id)
     return dataset
+
+
+def add_tag(tag_id):
+    """
+    """
+
+def remove_tag(tag_id):
+    """
+    """
+
+def add_file(file_id):
+    """
+    """
+
+def remove_file(file_id):
+    """
+    """

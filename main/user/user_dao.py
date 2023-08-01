@@ -25,6 +25,9 @@ def create_user(user_data):
     
     user.save()
 
+    #become org_contributor on creation
+    #become org admin on addition or creation of org
+    #become super admin ???
     user_role = UserRole(
         org_contributor = user_data.get("roles").get("organization_contributor"),
         org_admin = user_data.get("roles").get("organization_admin"),

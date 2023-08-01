@@ -12,8 +12,11 @@ class Organization(models.Model):
     email = models.EmailField(default=None)
     password = models.CharField(max_length= 50, default=None)
     description = models.CharField(max_length= 1000, blank= True, null= True)
-    is_deleted = models.BooleanField(default= True)
-    category = models.ManyToManyField("OrganizationCategory", through= "Organization_OrganizationCategory")
+    is_deleted = models.BooleanField(default= False)
+
+    categories = models.ManyToManyField("OrganizationCategory", through= "Organization_OrganizationCategory")
+    admins = models.ManyToManyField("user.User", related_name="admin_organizations", through="Organization_Admin")
+    members = models.ManyToManyField("user.User", related_name = "member_organizations", through="Organization_Members")
 
 
 
@@ -25,11 +28,14 @@ class Organization(models.Model):
             "organization name" : self.organization_name,
             "phone_number" : self.phone_number,
             "description" : self.description,
-            "category" : self.category,
             "email" : self.email,
             "location" : self.location,
             "address" : self.address,
-            "is_deleted" : self.is_deleted
+            "is_deleted" : self.is_deleted,
+            "categories" : [category.serialize() for category in self.categories.all()],
+            "members" : [member.serialize() for member in self.members.all()],
+            "admins" : [admin.serialize() for admin in self.admins.all()]
+
         }
 
 
@@ -39,7 +45,20 @@ class OrganizationCategory(models.Model):
     """
     type = models.CharField(max_length=50)
 
+    def serialize(self):
+        return {
+            "type" : self.type
+        }
+
 
 class Organization_OrganizationCategory(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.RESTRICT)
     organizationCategory = models.ForeignKey(OrganizationCategory, on_delete=models.RESTRICT)
+
+class Organization_Admin(models.Model):
+    org = models.ForeignKey(Organization, on_delete=models.RESTRICT)
+    admin = models.ForeignKey("user.User", on_delete=models.RESTRICT)
+
+class Organization_Members(models.Model):
+    org = models.ForeignKey(Organization, on_delete=models.RESTRICT)
+    members = models.ForeignKey("user.User", on_delete=models.RESTRICT)

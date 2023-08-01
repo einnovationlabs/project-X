@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from user.models import User
 import user.user_dao as user_dao
 from django.views.decorators.csrf import csrf_exempt
 import json

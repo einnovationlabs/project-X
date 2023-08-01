@@ -24,13 +24,13 @@ def home(request):
 
 ##### DATASETS ENDPOINTS #####
 @csrf_exempt
-def create_dataset(request):
+def create_dataset(request, owner_user_id):
     """
     Endpoint to create dataset
     """
     data = json.loads(request.body)
 
-    dataset = dataset_dao.create_dataset(data)
+    dataset = dataset_dao.create_dataset(data, owner_user_id)
     
     return JsonResponse(dataset.serialize())
 
@@ -40,12 +40,19 @@ def delete_dataset(request, dataset_id):
     """
     Endpoint to delete dataset by id
     """
+    dataset = dataset_dao.delete_dataset(dataset_id)
+    return JsonResponse(dataset.serialize())
 
 @csrf_exempt
-def update_dataset(reques, dataset_id):
+def update_dataset(request, dataset_id):
     """
     Endpoint to update dataset by id
     """
+    data = json.loads(request.body)
+    dataset = dataset_dao.update_dataset(dataset_id, data)
+
+    return JsonResponse(dataset.serialize())
+
 
 @csrf_exempt
 def get_dataset(request, dataset_id):

@@ -40,9 +40,7 @@ class UserRole(models.Model):
 
 
 
-# class Organization_AdminUser(models.Model):
-#     org_admin_id = models.ForeignKey(Organization, on_delete=models.RESTRICT)
-#     user_id = models.ForeignKey(User, on_delete=models.RESTRICT)
+
 
 #     # Add any extra fields or attributes you want for this relationship
 #     # extra_field = models.CharField(max_length=100)
