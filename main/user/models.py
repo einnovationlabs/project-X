@@ -16,6 +16,7 @@ class User(models.Model):
     email = models.EmailField(null= True)
     about = models.CharField(max_length= 1000, blank= True, null= True)
     is_deleted = models.BooleanField(default= False)
+    roles = models.ManyToManyField("UserRole", through="User_UserRole")
 
 
     def serialize(self):
@@ -25,7 +26,13 @@ class User(models.Model):
             "phone_number" : self.phone_number,
             "profile_picture" : self.profile_pic,
             "background_picture" : self.background_pic,
-            "is_deleted" : self.is_deleted
+            "username" : self.username,
+            "firstname" : self.firstname,
+            "lastname" : self.lastname,
+            "email" : self.email,
+            "about" : self.about,
+            "is_deleted" : self.is_deleted,
+            "roles" : [role.serialize() for role in self.roles]
         }
 
 
@@ -38,6 +45,14 @@ class UserRole(models.Model):
     org_admin = models.BooleanField(default=False)
     super_admin = models.BooleanField(default=False)
 
+    def serialize(self):
+        return {
+            "profile_user" : self.profile_user,
+            "org_contributor" : self.org_contributor,
+            "org_admin" : self.org_admin,
+            "super_admin" : self.super_admin
+        }
+
 
 
 
@@ -46,16 +61,9 @@ class UserRole(models.Model):
 #     # extra_field = models.CharField(max_length=100)
 
 
-# class Dataset_DatasetFile(models.Model):
-#     dataset = models.ForeignKey(Dataset, on_delete=models.RESTRICT)
-#     DatasetFile = models.ForeignKey(DatasetFile, on_delete=models.RESTRICT)
-
-
-
-
-# class User_UserRole(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.RESTRICT)
-#     UserRole = models.ForeignKey(UserRole, on_delete=models.RESTRICT)
+class User_UserRole(models.Model):
+    user = models.ForeignKey(User, on_delete=models.RESTRICT)
+    UserRole = models.ForeignKey(UserRole, on_delete=models.RESTRICT)
 
 
 

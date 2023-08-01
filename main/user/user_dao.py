@@ -64,7 +64,7 @@ def delete_user(user_id):
     Deletes and Returns User given user_id
     """
     user = User.objects.get(id = user_id)
-    user.is_active = False
+    user.is_deleted = True
     user.save()
     return user
 
