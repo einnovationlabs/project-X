@@ -69,6 +69,7 @@ class DatasetAddtFile(models.Model):
 
     def serialize(self):
         return {
+            "id" : self.id,
             "title" : self.title,
             "file_url" : self.file_url
         }
@@ -97,6 +98,7 @@ class DatasetComment(models.Model):
 
     def serialize(self):
         return {
+            "id" : self.id,
             "body" : self.body
         }
 
@@ -119,6 +121,7 @@ class DatasetMetadata(models.Model):
 
     def serialize(self):
         return {
+            "id" : self.id,
             "metadata_file" : self.metadata_file,
             "date_created" : self.date_created,
             "date_modified" : self.date_modified

@@ -35,6 +35,7 @@ def create_user(user_data):
     )
 
     user_role.save()
+    user.roles.add(user_role)
 
     return user
 

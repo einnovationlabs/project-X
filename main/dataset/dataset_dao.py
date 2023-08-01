@@ -13,7 +13,7 @@ def create_dataset(dataset_data, owner_user_id):
     """
     Creates dataset given dataset_data
     """
-    dataset_metadata = DatasetMetadata(
+    metadata = DatasetMetadata(
             metadata_file = dataset_data.get("metadata").get("metadata_file"),
             metadata_title = dataset_data.get("metadata").get("metadata_title"),
             metadata_blurb = dataset_data.get("metadata").get("metadata_blurb"),
@@ -23,7 +23,7 @@ def create_dataset(dataset_data, owner_user_id):
             maintainer = dataset_data.get("metadata").get("maintainer"),
             license_link = dataset_data.get("metadata").get("license_link")
     )
-    dataset_metadata.save()
+    metadata.save()
 
     owner_user = get_user(owner_user_id)
     dataset = Dataset(
@@ -36,7 +36,7 @@ def create_dataset(dataset_data, owner_user_id):
             number_of_likes = dataset_data.get('number_of_likes'),
             csv_file_url = dataset_data.get("csv_file_url"),
             owner_user = owner_user,
-            dataset_metadata = dataset_metadata
+            metadata = metadata
             )
     
     dataset.save()
@@ -59,18 +59,18 @@ def update_dataset(dataset_id, dataset_data):
     """
     dataset = Dataset.objects.get(id = dataset_id)
 
-    dataset_metadata = dataset.metadata
+    metadata = dataset.dataset_metadata
 
-    dataset_metadata.metadata_file = dataset_data.get("metadata").get("metadata_file")
-    dataset_metadata.metadata_title = dataset_data.get("metadata").get("metadata_title")
-    dataset_metadata.metadata_blurb = dataset_data.get("metadata").get("metadata_blurb")
-    dataset_metadata.metadata_source_link = dataset_data.get("metadata").get("metadata_source_link")
-    dataset_metadata.metadata_resource_type = dataset_data.get("metadata").get("metadata_resource_type")
-    dataset_metadata.publisher = dataset_data.get("metadata").get("publisher")
-    dataset_metadata.maintainer = dataset_data.get("metadata").get("maintainer")
-    dataset_metadata.license_link = dataset_data.get("metadata").get("license_link")
+    metadata.metadata_file = dataset_data.get("metadata").get("metadata_file")
+    metadata.metadata_title = dataset_data.get("metadata").get("metadata_title")
+    metadata.metadata_blurb = dataset_data.get("metadata").get("metadata_blurb")
+    metadata.metadata_source_link = dataset_data.get("metadata").get("metadata_source_link")
+    metadata.metadata_resource_type = dataset_data.get("metadata").get("metadata_resource_type")
+    metadata.publisher = dataset_data.get("metadata").get("publisher")
+    metadata.maintainer = dataset_data.get("metadata").get("maintainer")
+    metadata.license_link = dataset_data.get("metadata").get("license_link")
 
-    dataset_metadata.save()
+    metadata.save()
 
 
     dataset.is_verified = dataset_data.get('is_verified')

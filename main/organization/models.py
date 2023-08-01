@@ -25,6 +25,7 @@ class Organization(models.Model):
         Serializes Organization object
         """
         return {
+            "id" : self.id,
             "organization name" : self.organization_name,
             "phone_number" : self.phone_number,
             "description" : self.description,
@@ -47,6 +48,7 @@ class OrganizationCategory(models.Model):
 
     def serialize(self):
         return {
+            "id" : self.id,
             "type" : self.type
         }
 

@@ -32,7 +32,7 @@ class User(models.Model):
             "email" : self.email,
             "about" : self.about,
             "is_deleted" : self.is_deleted,
-            "roles" : [role.serialize() for role in self.roles]
+            "roles" : [role.serialize() for role in self.roles.all()]
         }
 
 
@@ -47,6 +47,7 @@ class UserRole(models.Model):
 
     def serialize(self):
         return {
+            "id" : self.id,
             "profile_user" : self.profile_user,
             "org_contributor" : self.org_contributor,
             "org_admin" : self.org_admin,
