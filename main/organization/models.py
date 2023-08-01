@@ -5,6 +5,17 @@ class Organization(models.Model):
     """
     Organization model
     """
+    organization_name = models.CharField(max_length= 100, default=None)
+    location = models.CharField(max_length= 100, default=None)
+    address = models.CharField(max_length= 100, default=None)
+    phone_number = models.CharField(max_length=50, default=None)
+    email = models.EmailField(default=None)
+    password = models.CharField(max_length= 50, default=None)
+    description = models.CharField(max_length= 1000, blank= True, null= True)
+    is_deleted = models.BooleanField(default= True)
+    category = models.ManyToManyField("OrganizationCategory", through= "Organization_OrganizationCategory")
+
+
 
     def serialize(self):
         """
@@ -29,16 +40,6 @@ class OrganizationCategory(models.Model):
     type = models.CharField(max_length=50)
 
 
-class OrganizationProfile(models.Model):
-    """
-    Organization Profile model
-    """
-    organization = models.OneToOneField(Organization, unique=True, on_delete=models.RESTRICT)
-    organization_name = models.CharField(max_length= 100)
-    location = models.CharField(max_length= 100)
-    address = models.CharField(max_length= 100)
-    phone_number = models.CharField(max_length=50)
-    email = models.EmailField()
-    password = models.CharField(max_length= 50)
-    description = models.CharField(max_length= 1000, blank= True, null= True)
-    is_deleted = models.BooleanField(default= True)
+class Organization_OrganizationCategory(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.RESTRICT)
+    organizationCategory = models.ForeignKey(OrganizationCategory, on_delete=models.RESTRICT)

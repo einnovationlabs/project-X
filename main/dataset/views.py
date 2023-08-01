@@ -1,4 +1,10 @@
 from django.shortcuts import render
+from django.http import HttpResponse
+from dataset.models import Dataset
+import dataset.dataset_dao as dataset_dao
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.http import JsonResponse
 
 # Create your views here.
 
@@ -46,6 +52,8 @@ def get_dataset(request, dataset_id):
     """
     Endpoint to get dataset by id
     """
+    dataset = dataset_dao.get_dataset(dataset_id = dataset_id)
+    return JsonResponse(dataset.serialize())
 
 @csrf_exempt
 def get_all_datasets(request):

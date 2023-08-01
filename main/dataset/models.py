@@ -19,19 +19,15 @@ class Dataset(models.Model):
     number_of_likes = models.IntegerField(default=0)
     is_deleted = models.BooleanField(default=False)
 
-    # owner_organization = models.ForeignKey("organization.Organization", on_delete=models.RESTRICT, default=None)
+    owner_organization = models.ForeignKey("organization.Organization", on_delete=models.RESTRICT, null=True)
     owner_user = models.ForeignKey("user.User", on_delete=models.RESTRICT, default=None)
 
     csv_file_url = models.URLField(null= True)
-    dataset_addt_files = models.ForeignKey(
-        "DatasetAddtFile",
-        on_delete= models.RESTRICT,
-        null= True
-    )
 
     dataset_metadata = models.ForeignKey("DatasetMetadata", on_delete=models.RESTRICT, default=None, unique= True, null=True)
-
     tags = models.ManyToManyField("DatasetTag", through= "Dataset_DatasetTag")
+
+
 
 
     def serialize(self):
@@ -41,8 +37,20 @@ class Dataset(models.Model):
         return {
             "id" : self.id,
             "is_verified" : self.is_verified,
+            "has_user_policy" : self.has_user_policy,
+            "is_government" : self.is_government,
+            "is_public" : self.is_public,
+            "status" : self.status,
+            "number_of_likes" : self.number_of_likes,
+            "is_deleted" : self.is_deleted,
             "addt_info" : self.addt_info,
-            "tags" : [tag.serialize() for tag in self.tags.all()]
+            "tags" : [tag.serialize() for tag in self.tags.all()],
+            "owner_user" : self.owner_user.serialize() if self.owner_user else None,
+            "owner_organization" : self.owner_organization.serialize() if self.owner_organization else None,
+            "csv_file_url" : self.csv_file_url,
+            "dataset_addt_files" : [file.serialize() for file in self.datasetaddtfile_set.all()],
+            "dataset_metadata" : self.dataset_metadata.serialize(),
+            "dataset_comments" : [comment.serialize() for comment in self.datasetcomment_set.all()]
         }
 
 
@@ -52,6 +60,18 @@ class DatasetAddtFile(models.Model):
     """
     title = models.CharField(max_length=50)
     file_url = models.URLField()
+
+    file_dataset = models.ForeignKey(
+        "Dataset",
+        on_delete= models.RESTRICT,
+        null= True
+    )
+
+    def serialize(self):
+        return {
+            "title" : self.title,
+            "file_url" : self.file_url
+        }
 
 
 class DatasetTag(models.Model):
@@ -75,6 +95,11 @@ class DatasetComment(models.Model):
     user = models.ForeignKey("user.User", on_delete=models.RESTRICT)
     body = models.TextField()
 
+    def serialize(self):
+        return {
+            "body" : self.body
+        }
+
 
 class DatasetMetadata(models.Model):
     """
@@ -91,6 +116,14 @@ class DatasetMetadata(models.Model):
     date_created = models.DateField( auto_now_add=True)
     date_modified = models.DateField(auto_now=True)
 
+
+    def serialize(self):
+        return {
+            "metadata_file" : self.metadata_file,
+            "date_created" : self.date_created,
+            "date_modified" : self.date_modified
+        }
+
 class Dataset_DatasetTag(models.Model):
     dataset = models.ForeignKey(Dataset, on_delete=models.RESTRICT)
-    DatasetTag = models.ForeignKey(DatasetTag, on_delete=models.RESTRICT)
+    datasetTag = models.ForeignKey(DatasetTag, on_delete=models.RESTRICT)

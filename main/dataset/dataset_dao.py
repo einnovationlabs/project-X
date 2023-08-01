@@ -42,8 +42,8 @@ def create_dataset(dataset_data):
     dataset.save()
 
     for dataset_title, url in dataset_data.get("dataset_files"):
-        dataset_addt_file = DatasetAddtFile(title = dataset_title, file_url = url)
-        dataset_addt_file.save()
+        addt_file = DatasetAddtFile(title = dataset_title, file_url = url, file_dataset = dataset)
+        addt_file.save()
 
     for tag_name in dataset_data.get("tags"):
         tag = DatasetTag(name = tag_name)
@@ -84,3 +84,5 @@ def get_dataset(dataset_id):
     """
     Retrieves and Returns dataset given dataset_id
     """
+    dataset = Dataset.objects.get(id = dataset_id)
+    return dataset

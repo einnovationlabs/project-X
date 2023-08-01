@@ -15,7 +15,7 @@ class User(models.Model):
     lastname = models.CharField(max_length= 100, null=True)
     email = models.EmailField(null= True)
     about = models.CharField(max_length= 1000, blank= True, null= True)
-    is_deleted = models.BooleanField(default= True)
+    is_deleted = models.BooleanField(default= False)
 
 
     def serialize(self):
@@ -53,10 +53,6 @@ class UserRole(models.Model):
 #     DatasetFile = models.ForeignKey(DatasetFile, on_delete=models.RESTRICT)
 
 
-
-# class Organization_OrganizationCategory(models.Model):
-#     organization = models.ForeignKey(Organization, on_delete=models.RESTRICT)
-#     OrganizationCategory = models.ForeignKey(OrganizationCategory, on_delete=models.RESTRICT)
 
 
 # class User_UserRole(models.Model):

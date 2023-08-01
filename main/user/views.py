@@ -50,7 +50,7 @@ def get_user(request, user_id):
     """
     Endpoint to get user by id
     """
-    user = User.objects.get(id = user_id)
+    user = user_dao.get_user(user_id = user_id)
     return JsonResponse(user.serialize())
 
 
