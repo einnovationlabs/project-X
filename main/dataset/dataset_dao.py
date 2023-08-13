@@ -11,7 +11,7 @@ from user.user_dao import get_user
 from dataset.models import Comment
 from dataset.models import Like
 from dataset.models import Bookmark
-
+from organization.organization_dao import get_org
 def create_dataset(dataset_data, user_id):
     """
     Creates dataset given dataset_data
@@ -256,5 +256,99 @@ def delete_bookmark(user_id, bookmark_id):
     bookmark.save()
 
     return True, bookmark.serialize()
+
+def add_owner_org(user_id, dataset_data):
+    """
+    Adds owner org to dataset by user
+    """
+    dataset = get_dataset(dataset_data.get("dataset_id"))
+    org = get_org(dataset_data.gete("org_id"))
+
+    if dataset.owner_user.id != user_id:
+        return False, dataset
+    dataset.owner_org = org
+    dataset.save()
+
+    return True, dataset  #TODO: remove owner org or just update
+
+
+def publish_dataset(user_id, dataset_id):
+    """
+    Publishes dataset by user
+    """
+    dataset = get_dataset(dataset_id)
+    if dataset.owner_user.id != user_id:
+        return False, dataset
+    
+    dataset.is_published = True
+    dataset.save()
+
+    return True, dataset
+
+
+def unpusblish_dataset(user_id, dataset_id):
+    """
+    Unpublishes dataset by user
+    """
+    dataset = get_dataset(dataset_id)
+    if dataset.owner_user.id != user_id:
+        return False, dataset
+    
+    dataset.is_published = False
+    dataset.save()
+
+    return True, dataset
+
+def archive_dataset(user_id, dataset_id):
+    """
+    Archives dataset by user
+    """
+    dataset = get_dataset(dataset_id)
+    if dataset.owner_user.id != user_id:
+        return False, dataset
+    
+    dataset.is_archived = True
+    dataset.save()
+
+    return True, dataset
+
+def unarchive_dataset(user_id, dataset_id):
+    """
+    Unarchives dataset by user
+    """
+    dataset = get_dataset(dataset_id)
+    if dataset.owner_user.id != user_id:
+        return False, dataset
+    
+    dataset.is_archived = False
+    dataset.save()
+
+    return True, dataset
+
+def approve_dataset(user_id, dataset_id):
+    """
+    Approves dataset by user
+    """
+    dataset = get_dataset(dataset_id)
+    if dataset.owner_user.id != user_id:
+        return False, dataset
+    
+    dataset.is_approved = True
+    dataset.save()
+
+    return True, dataset
+
+def disapprove_dataset(user_id, dataset_id):
+    """
+    Disapproves dataset by user
+    """
+    dataset = get_dataset(dataset_id)
+    if dataset.owner_user.id != user_id:
+        return False, dataset
+    
+    dataset.is_approved = False
+    dataset.save()
+
+    return True, dataset
 
 # TODO: if depends on condition, use tuple returns else return serialized()

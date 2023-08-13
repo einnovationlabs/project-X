@@ -12,6 +12,12 @@ class Dataset(models.Model):
     is_government = models.BooleanField(default=False)
     is_public = models.BooleanField(default=True)
 
+
+    is_published = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default= True)
+    is_approved = models.BooleanField(default=False)
+
+
     status = models.TextField(default=None)  #make it choices
 
     addt_info = models.TextField(default=None)
@@ -36,6 +42,9 @@ class Dataset(models.Model):
             "has_user_policy" : self.has_user_policy,
             "is_government" : self.is_government,
             "is_public" : self.is_public,
+            "is_published" : self.is_published,
+            "is_archived" : self.is_archived,
+            "is_approved" : self.is_approved,
             "status" : self.status,
             "is_deleted" : self.is_deleted,
             "addt_info" : self.addt_info,

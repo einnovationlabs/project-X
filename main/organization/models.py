@@ -13,6 +13,7 @@ class Organization(models.Model):
     password = models.CharField(max_length= 50, default=None)
     description = models.CharField(max_length= 1000, blank= True, null= True)
     is_deleted = models.BooleanField(default= False)
+    is_approved = models.BooleanField(default=False)
 
     categories = models.ManyToManyField("OrganizationCategory", through= "Organization_OrganizationCategory")
     admins = models.ManyToManyField("user.User", related_name="admin_organizations", through="Organization_Admin")
@@ -33,6 +34,7 @@ class Organization(models.Model):
             "location" : self.location,
             "address" : self.address,
             "is_deleted" : self.is_deleted,
+            "is_approved" : self.is_approved,
             "categories" : [category.serialize() for category in self.categories.all()],
             "members" : [member.serialize() for member in self.members.all()],
             "admins" : [admin.serialize() for admin in self.admins.all()]

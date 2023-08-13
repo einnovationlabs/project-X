@@ -79,8 +79,57 @@ def add_category(org_id):
     """
     """
 
+
 def remove_category(org_id):
     """
     """
 
 
+def add_org_member(admin_id, org_data):  #TODO: add member or members
+    """
+    Adds member to organization by user
+    """
+    org = get_org(org_data.get("org_id"))
+    admin = org.admins.filter(admin = get_user(admin_id)).first()
+
+    if not admin:
+        return False, admin
+    
+    member_id = org_data.get("member_id")
+    member = get_user(member_id)
+    org.members.add(member)
+
+    #TODO: reconsider roles field for user
+
+    org.save()
+
+    return True, org
+
+
+def remove_org_member(admin_id, org_data):
+    """
+    Removes member from organization by user
+    """
+    org = get_org(org_data.get("org_id"))
+
+    admin = org.admins.filter(admin = get_user(admin_id)).first()
+    if not admin:
+        return False, admin
+    member_id = org_data.get("member_id")
+    member = get_user(member_id)
+    org.members.remove(member)
+
+    org.save()
+
+    return True, org
+
+def approve_org():
+    """
+    Approve organization by user
+    """
+
+
+def disapprove_org():
+    """
+    Disapprove organization by user
+    """
