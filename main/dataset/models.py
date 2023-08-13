@@ -16,19 +16,15 @@ class Dataset(models.Model):
 
     addt_info = models.TextField(default=None)
 
-    number_of_likes = models.IntegerField(default=0)
     is_deleted = models.BooleanField(default=False)
 
     owner_organization = models.ForeignKey("organization.Organization", on_delete=models.RESTRICT, null=True)
     owner_user = models.ForeignKey("user.User", on_delete=models.RESTRICT, default=None)
 
-    csv_file_url = models.URLField(null= True)
 
     dataset_metadata = models.ForeignKey("DatasetMetadata", on_delete=models.RESTRICT, default=None, unique= True, null=True)
-    tags = models.ManyToManyField("DatasetTag", through= "Dataset_DatasetTag")
 
-
-
+    # TODO:multiple serialize
 
     def serialize(self):
         """
@@ -41,45 +37,50 @@ class Dataset(models.Model):
             "is_government" : self.is_government,
             "is_public" : self.is_public,
             "status" : self.status,
-            "number_of_likes" : self.number_of_likes,
             "is_deleted" : self.is_deleted,
             "addt_info" : self.addt_info,
-            "tags" : [tag.serialize() for tag in self.tags.all()],
             "owner_user" : self.owner_user.serialize() if self.owner_user else None,
             "owner_organization" : self.owner_organization.serialize() if self.owner_organization else None,
-            "csv_file_url" : self.csv_file_url,
-            "dataset_addt_files" : [file.serialize() for file in self.datasetaddtfile_set.all()],
             "dataset_metadata" : self.dataset_metadata.serialize(),
-            "dataset_comments" : [comment.serialize() for comment in self.datasetcomment_set.all()]
         }
+ 
 
 
-class DatasetAddtFile(models.Model):
+class File(models.Model):
     """
-    Dataset Additional Info model
+    File model
     """
     title = models.CharField(max_length=50)
-    file_url = models.URLField()
+    file_url = models.CharField(max_length=50, default= None)
 
-    file_dataset = models.ForeignKey(
-        "Dataset",
-        on_delete= models.RESTRICT,
-        null= True
-    )
+    owner_user = models.ForeignKey("user.User", on_delete=models.RESTRICT, null=True, related_name= "user_files")
+    dataset = models.ForeignKey("Dataset", on_delete=models.RESTRICT, null=True, related_name="dataset_files")
+    owner_org = models.ForeignKey("organization.Organization", on_delete=models.RESTRICT, null=True, related_name="org_files")
+    status = models.BooleanField(default=True)
 
     def serialize(self):
         return {
             "id" : self.id,
             "title" : self.title,
-            "file_url" : self.file_url
+            "file_url" : self.file_url,
+            "status" : self.status,
+            "owner_user" : self.owner_user.id if self.owner_user else None
         }
 
+# TODO: consider situation where orgs and users are also tagged
+# TODO: name and type of that tag
+# TODO: users, organizations should have files as well
+# TODO: likes table 
 
-class DatasetTag(models.Model):
+
+class Tag(models.Model):
     """
     Dataset Tag model
     """
     name = models.CharField(max_length=50)
+    user = models.ForeignKey("user.User", on_delete=models.RESTRICT, null=True)
+    dataset = models.ForeignKey("Dataset", on_delete=models.RESTRICT, null=True)
+    org = models.ForeignKey("organization.Organization", on_delete=models.RESTRICT, null=True)
 
     def serialize(self):
         return {
@@ -88,18 +89,24 @@ class DatasetTag(models.Model):
         }
 
 
-class DatasetComment(models.Model):
+class Comment(models.Model):
     """
     Dataset Comment model
     """
     dataset = models.ForeignKey("Dataset", on_delete=models.RESTRICT)
-    user = models.ForeignKey("user.User", on_delete=models.RESTRICT)
+    owner_user = models.ForeignKey("user.User", on_delete=models.RESTRICT)
     body = models.TextField()
+    date_created = models.DateField(auto_now_add=True)
+    status = models.BooleanField(default=True)
+
 
     def serialize(self):
         return {
             "id" : self.id,
-            "body" : self.body
+            "body" : self.body,
+            "dataset" : self.dataset.id if self.dataset else None,
+            "owner_user" : self.owner_user.id if self.owner_user else None,
+            "status" : self.status
         }
 
 
@@ -107,7 +114,7 @@ class DatasetMetadata(models.Model):
     """
     Dataset Metadata model
     """
-    metadata_file = models.URLField(null=True)
+    metadata_file = models.CharField(max_length= 50, null=True)  #relation with file model
     metadata_title = models.CharField(max_length= 100)  
     metadata_blurb = models.CharField(max_length= 1000, blank= True, null= True)
     metadata_source_link = models.URLField()
@@ -115,7 +122,7 @@ class DatasetMetadata(models.Model):
     publisher = models.CharField(max_length=100)  # user or org or Admin ?
     maintainer = models.CharField(max_length=100)  # user or org or Admin ?
     license_link = models.URLField()
-    date_created = models.DateField( auto_now_add=True)
+    date_created = models.DateField(auto_now_add=True)
     date_modified = models.DateField(auto_now=True)
 
 
@@ -126,7 +133,22 @@ class DatasetMetadata(models.Model):
             "date_created" : self.date_created,
             "date_modified" : self.date_modified
         }
+    
 
-class Dataset_DatasetTag(models.Model):
-    dataset = models.ForeignKey(Dataset, on_delete=models.RESTRICT)
-    datasetTag = models.ForeignKey(DatasetTag, on_delete=models.RESTRICT)
+class Like(models.Model):
+    """
+    Like model
+    """
+    owner_user = models.ForeignKey("user.User", on_delete=models.RESTRICT) 
+    dataset = models.ForeignKey("Dataset", on_delete=models.RESTRICT)
+    status = models.BooleanField(default=True)
+
+class Bookmark(models.Model):
+    """
+    Bookmark model
+    """
+
+    owner_user = models.ForeignKey("user.User", on_delete=models.RESTRICT) 
+    dataset = models.ForeignKey("Dataset", on_delete=models.RESTRICT)
+    status = models.BooleanField(default=True)
+

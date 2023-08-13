@@ -13,6 +13,18 @@ def home(request):
 
 # User Management Endpoints
 @csrf_exempt
+def update_user_role(request, user_id):
+    """
+    Endpoint to update user roles
+    """
+    data = json.loads(request.body)
+
+    user_roles = user_dao.update_user_role(user_id, data)
+
+    return JsonResponse(user_roles)
+
+
+@csrf_exempt
 def create_user(request):
     """
     Endpoint to create user

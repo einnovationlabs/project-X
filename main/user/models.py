@@ -7,16 +7,17 @@ class User(models.Model):
     User model
     """
     phone_number = models.CharField(max_length=50, null=True)
-    profile_pic = models.CharField(max_length=100, blank=True, null= True)
+    profile_pic = models.CharField(max_length=100, blank=True, null= True)  #TODO:filed fields are not serializable
     background_pic = models.CharField(max_length=100, blank=True, null= True)
     username = models.CharField(max_length = 100, null=True)
-    password = models.CharField(max_length= 50, null=True)
+    password_digest = models.CharField(max_length= 50, null=True)
     firstname = models.CharField(max_length= 100, null=True)
     lastname = models.CharField(max_length= 100, null=True)
     email = models.EmailField(null= True)
     about = models.CharField(max_length= 1000, blank= True, null= True)
     is_deleted = models.BooleanField(default= False)
     roles = models.ManyToManyField("UserRole", through="User_UserRole")
+
 
 
     def serialize(self):
@@ -33,7 +34,7 @@ class User(models.Model):
             "about" : self.about,
             "is_deleted" : self.is_deleted,
             "roles" : [role.serialize() for role in self.roles.all()]
-        }
+        }  #TODO: user has just a role 
 
 
 class UserRole(models.Model):
@@ -64,7 +65,7 @@ class UserRole(models.Model):
 
 class User_UserRole(models.Model):
     user = models.ForeignKey(User, on_delete=models.RESTRICT)
-    UserRole = models.ForeignKey(UserRole, on_delete=models.RESTRICT)
+    user_role = models.ForeignKey(UserRole, on_delete=models.RESTRICT)
 
 
 
