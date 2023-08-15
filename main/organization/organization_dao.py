@@ -12,7 +12,12 @@ def create_org(org_data, admin_id):
     """
     Creates and Returns Organization given org_data
     """
+    success, admin = get_user(admin_id)
 
+    if not success:
+        return False, None
+
+ 
     org = Organization(
             organization_name = org_data.get('organization_name'), 
             location = org_data.get('location'), 
@@ -22,9 +27,11 @@ def create_org(org_data, admin_id):
             password = org_data.get('password'), 
             description = org_data.get('description'), 
             )
+    
+    if not success:
+        return False, org
+    
     org.save()
-
-    admin = get_user(admin_id)
     org.admins.add(admin)
 
     for org_type in org_data.get("categories"):
@@ -35,14 +42,17 @@ def create_org(org_data, admin_id):
         org.categories.add(org_category)
 
 
-    return org
+    return True, org
 
 
 def update_org(org_id, org_data):
     """
     Updates and Returns Organization given org_id and org_data
     """
-    org = Organization.objects.get(id = org_id)
+    success, org = get_org(id = org_id)
+
+    if not success:
+        return False, org
 
     org.organization_name = org_data.get('organization_name')
     org.location = org_data.get('location')
@@ -54,17 +64,22 @@ def update_org(org_id, org_data):
 
     org.save()
 
-    return org
+    return True, org
 
 
 def delete_org(org_id):
     """
     Deletes and Returns Organization given org_id
     """
-    org = Organization.objects.get(id = org_id)
+    success, org = get_org(id = org_id)
+
+    if not success:
+        return False, org
+    
     org.is_deleted = True
     org.save()
-    return org
+
+    return True, org
 
 
 def get_org(org_id):
@@ -72,7 +87,11 @@ def get_org(org_id):
     Retrieves and Returns Organization given org_id
     """
     org = Organization.objects.get(id = org_id)
-    return org
+
+    if not org:
+        return False, org
+    
+    return True, org
 
 
 def add_category(org_id):
@@ -89,39 +108,59 @@ def add_org_member(admin_id, org_data):  #TODO: add member or members
     """
     Adds member to organization by user
     """
-    org = get_org(org_data.get("org_id"))
-    admin = org.admins.filter(admin = get_user(admin_id)).first()
+    member_id = org_data.get("member_id")
+    success, member = get_user(member_id)
+    if not success:
+        return False, member
+    
+    success, org = get_org(org_data.get("org_id"))
+
+    if not success:
+        return False, member
+    
+    success, admin = get_user(admin_id)
+
+    if not success:
+        return False, member
+
+    admin = org.admins.filter(admin).first()
 
     if not admin:
-        return False, admin
+        return False, member
     
-    member_id = org_data.get("member_id")
-    member = get_user(member_id)
+    
     org.members.add(member)
-
     #TODO: reconsider roles field for user
-
     org.save()
 
-    return True, org
+    return True, member
 
 
 def remove_org_member(admin_id, org_data):
     """
     Removes member from organization by user
     """
-    org = get_org(org_data.get("org_id"))
+
+    member_id = org_data.get("member_id")
+    success, member = get_user(member_id)
+
+    if not success:
+        return False, member
+    
+    success, org = get_org(org_data.get("org_id"))
+    if not success:
+        return False, member
+
 
     admin = org.admins.filter(admin = get_user(admin_id)).first()
-    if not admin:
-        return False, admin
-    member_id = org_data.get("member_id")
-    member = get_user(member_id)
-    org.members.remove(member)
 
+    if not admin:
+        return False, member
+    
+    org.members.remove(member)
     org.save()
 
-    return True, org
+    return True, member
 
 def approve_org():
     """

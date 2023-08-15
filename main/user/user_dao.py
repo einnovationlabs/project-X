@@ -37,14 +37,18 @@ def create_user(user_data):
     user.roles.add(user_role)
 
     user.save()
-    return user
+    return True, user
 
 
 def update_user(user_id, user_data):
     """
     Updates and Returns User given user_id and user_data
     """
-    user = User.objects.get(id = user_id)
+    exists, user = get_user(user_id)
+
+    if not exists:
+        return False, user
+
 
     user.firstname = user_data.get('firstname')
     user.lastname = user_data.get('lastname')
@@ -58,13 +62,17 @@ def update_user(user_id, user_data):
 
     user.save()
 
-    return user
+    return True, user
 
 def update_user_role(user_id, user_data):
     """
     Updates user roles and Returns User given user_id and user_data
     """
-    user = User.objects.get(id = user_id)
+    exists, user = get_user(user_id)
+
+    if not exists:
+        return False, user
+    #TODO: need to reconsider this
     roles = user.roles 
 
     res = []
@@ -76,17 +84,21 @@ def update_user_role(user_id, user_data):
         res.append(role.serialize())
 
 
-    return {"user_id:" : user.id, "user_roles" : res}
+    return True, {"user_id:" : user.id, "user_roles" : res}
 
 
 def delete_user(user_id):
     """
     Deletes and Returns User given user_id
     """
-    user = User.objects.get(id = user_id)
+    exists, user = get_user(user_id)
+
+    if not exists:
+        return False, user
+    
     user.is_deleted = True
     user.save()
-    return user
+    return True, user
 
 
 def get_user(user_id):
@@ -94,4 +106,8 @@ def get_user(user_id):
     Retrieves and Returns User given user_id
     """
     user = User.objects.get(id = user_id)
-    return user
+
+    if not user:
+        return False, user
+    
+    return True, user

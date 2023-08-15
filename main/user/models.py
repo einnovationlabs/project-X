@@ -13,7 +13,7 @@ class User(models.Model):
     password_digest = models.CharField(max_length= 50, null=True)
     firstname = models.CharField(max_length= 100, null=True)
     lastname = models.CharField(max_length= 100, null=True)
-    email = models.EmailField(null= True)
+    email = models.EmailField(null= True, unique=True)
     about = models.CharField(max_length= 1000, blank= True, null= True)
     is_deleted = models.BooleanField(default= False)
     roles = models.ManyToManyField("UserRole", through="User_UserRole")

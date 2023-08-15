@@ -16,6 +16,11 @@ def create_dataset(dataset_data, user_id):
     """
     Creates dataset given dataset_data
     """
+    exists, owner_user = get_user(user_id)
+
+    if not exists:
+        return False, None
+
     metadata = DatasetMetadata(
             metadata_file = dataset_data.get("metadata").get("metadata_file"),
             metadata_title = dataset_data.get("metadata").get("metadata_title"),
@@ -28,7 +33,6 @@ def create_dataset(dataset_data, user_id):
     )
     metadata.save()
 
-    owner_user = get_user(user_id)
     dataset = Dataset(
             is_verified = dataset_data.get('is_verified'), 
             has_user_policy = dataset_data.get('has_user_policy'), 
@@ -61,7 +65,7 @@ def create_dataset(dataset_data, user_id):
         "dataset_tags" : tags,
         "dataset_files" : files
     }
-    return res
+    return True, res
 
 
 def update_dataset(dataset_id, dataset_data):
