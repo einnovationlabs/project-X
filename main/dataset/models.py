@@ -78,7 +78,7 @@ class File(models.Model):
 
 # TODO: consider situation where orgs and users are also tagged
 # TODO: name and type of that tag
-# TODO: users, organizations should have files as well
+# TODO: users, organizations should have files as well/relationships
 # TODO: likes table 
 
 
