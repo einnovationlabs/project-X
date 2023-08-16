@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class AppsUsersConfig(AppConfig):
+class DatasetConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps_users'
+    name = 'dataset'
