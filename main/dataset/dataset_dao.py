@@ -6,7 +6,7 @@ Helper file containing functions for accessing data in our database
 from dataset.models import Dataset
 from dataset.models import File
 from dataset.models import Tag
-from dataset.models import DatasetMetadata
+from dataset.models import Metadata
 from user.user_dao import get_user
 from dataset.models import Comment
 from dataset.models import Like
@@ -21,12 +21,12 @@ def create_dataset(dataset_data, user_id):
     if not exists:
         return False, None
 
-    metadata = DatasetMetadata(
-            metadata_file = dataset_data.get("metadata").get("metadata_file"),
-            metadata_title = dataset_data.get("metadata").get("metadata_title"),
-            metadata_blurb = dataset_data.get("metadata").get("metadata_blurb"),
-            metadata_source_link = dataset_data.get("metadata").get("metadata_source_link"),
-            metadata_resource_type = dataset_data.get("metadata").get("metadata_resource_type"),
+    metadata = Metadata(
+            file = dataset_data.get("metadata").get("file"),
+            title = dataset_data.get("metadata").get("title"),
+            blurb = dataset_data.get("metadata").get("blurb"),
+            source_link = dataset_data.get("metadata").get("source_link"),
+            resource_type = dataset_data.get("metadata").get("resource_type"),
             publisher = dataset_data.get("metadata").get("publisher"),
             maintainer = dataset_data.get("metadata").get("maintainer"),
             license_link = dataset_data.get("metadata").get("license_link")
@@ -38,49 +38,50 @@ def create_dataset(dataset_data, user_id):
             has_user_policy = dataset_data.get('has_user_policy'), 
             is_government = dataset_data.get('is_government'),
             is_public = dataset_data.get('is_public'),
-            status = dataset_data.get('status'),
             addt_info = dataset_data.get('addt_info'),
             owner_user = owner_user,
-            dataset_metadata = metadata
+            metadata = metadata
 
             )
     
     dataset.save()
-    files = []
-    for dataset_title, url in dataset_data.get("dataset_files"):
-        file = File(title = dataset_title, file_url = url, dataset = dataset, owner_user = owner_user)
+    for title, url in dataset_data.get("files"):
+        try:
+            file = File.objects.get(url = url)
+        except:
+            file = File(title = title, url = url) 
         file.save()
-        files.append(file.serialize())
+        dataset.files.add(file)
 
-    tags = []
     for tag_name in dataset_data.get("tags"):
-        tag = Tag(name = tag_name, dataset = dataset)
+        try:
+            tag = Tag.objects.get(name = tag_name)
+        except:
+            tag = Tag(name = tag_name) 
         tag.save()
-        tags.append(tag.serialize())
+        dataset.tags.add(tag)
         
     dataset.save()
 
-    res = {
-        "dataset" : dataset.serialize(),
-        "dataset_tags" : tags,
-        "dataset_files" : files
-    }
-    return True, res
+    return True, dataset
 
 
 def update_dataset(dataset_id, dataset_data):
     """
     Updates and returns dataset given dataset_id and dataset_data
     """
-    dataset = Dataset.objects.get(id = dataset_id)
+    success, dataset = get_dataset(dataset_id)
+
+    if not success:
+        return False, None
 
     metadata = dataset.dataset_metadata
 
-    metadata.metadata_file = dataset_data.get("metadata").get("metadata_file")
-    metadata.metadata_title = dataset_data.get("metadata").get("metadata_title")
-    metadata.metadata_blurb = dataset_data.get("metadata").get("metadata_blurb")
-    metadata.metadata_source_link = dataset_data.get("metadata").get("metadata_source_link")
-    metadata.metadata_resource_type = dataset_data.get("metadata").get("metadata_resource_type")
+    metadata.file = dataset_data.get("metadata").get("file")
+    metadata.title = dataset_data.get("metadata").get("title")
+    metadata.blurb = dataset_data.get("metadata").get("blurb")
+    metadata.source_link = dataset_data.get("metadata").get("source_link")
+    metadata.resource_type = dataset_data.get("metadata").get("resource_type")
     metadata.publisher = dataset_data.get("metadata").get("publisher")
     metadata.maintainer = dataset_data.get("metadata").get("maintainer")
     metadata.license_link = dataset_data.get("metadata").get("license_link")
@@ -99,45 +100,32 @@ def update_dataset(dataset_id, dataset_data):
 
     dataset.save()
 
-    return dataset
+    return True, dataset
 
 
 def delete_dataset(dataset_id):
-    dataset = Dataset.objects.get(id = dataset_id)
+    success, dataset = get_dataset(dataset_id)
+
+    if not success:
+        return False, None
+    
     dataset.is_deleted = True
     dataset.save()
 
-    return dataset
+    return True, dataset
 
 
 def get_dataset(dataset_id):
     """
-    Retrieves and Returns dataset given dataset_id
+    Retrieves and Returns serialized dataset given dataset_id
     """
     dataset = Dataset.objects.get(id = dataset_id)
-    files =  []
-    for file in File.objects.filter(dataset = dataset).all():
-        files.append(file.serialize())
-    tags = []
-    for tag in Tag.objects.filter(dataset = dataset).all():
-        tags.append(tag.serialize())
 
+    if not dataset:
+        return False, None
     
-    comments = []
-    for comment in Comment.objects.filter(dataset = dataset).all():
-        comments.append(comment.serialize())
-
-    likes = []
-    for like in Like.objects.filter(dataset = dataset).all():
-        likes.append(like.serialize())
-    res = {
-        "dataset" : dataset.serialize(),
-        "dataset_comments" : comments,
-        "dataset_tags" : tags,
-        "dataset_files" : files,
-        "dataset_likes" : likes,
-    }
-    return res
+    return True, dataset
+    
 
 def get_all_datasets():
     """
@@ -149,117 +137,240 @@ def get_all_datasets():
     for dataset in datasets:
         res.append(dataset.serialize())
 
-    return {"datasets" : res}
+    return True, {"datasets" : res}
+
+#TODO: tag
+def create_tag(dataset_id, tag_data):
+    """
+    Creates and Returns Tag given dataset_id
+    """
+    success, dataset = get_dataset(dataset_id)
+
+    if not success:
+        return False, None
+    tag_name = tag_data.get("name")
+    try:
+        tag = Tag.objects.get(name = tag_name)
+    except:
+        tag = Tag(name = tag_name)
+    tag.save()
+    dataset.tags.add(tag)
+    dataset.save()
+
+    return True, tag
+
+def get_tag(tag_id):
+    """
+    Retrieves and Returns Tag given tag_id
+    """
+    tag = Tag.objects.get(id = tag_id)
+
+    if not tag:
+        return False, tag
+
+    return True, tag
 
 
-def create_tag():
+def delete_tag(tag_id, dataset_id):
     """
+    Deletes and Returns Tag given dataset_id
     """
-    tag = Tag(name = tag_name, dataset = dataset)
+    success, dataset = get_dataset(dataset_id)
 
+    if not success:
+        return False, None
+    
+    success, tag = get_tag(tag_id)
 
-def delete_tag(tag_id):
-    """
-    """
+    if not success:
+        return False, None
+    dataset.tags.remove(tag)
 
-def create_file(user_id, file_data):
+    dataset.save()
+
+    return True, tag
+
+# TODO : file
+def create_file(dataset_id, file_data):
     """
-    Creates and Returns file by user
+    Creates and Returns file given dataset_id
     """
-    owner = get_user(user_id)
-    file = File(title = file_data.get("title"), file_url = file_data.get("url"), owner_user = owner)
+    success, dataset = get_dataset(dataset_id)
+
+    if not success:
+        return False, None
+    
+    file = File(title = file_data.get("title"), url = file_data.get("url"))
     file.save()
-    return file.serialize()
+
+    dataset.files.add(file)
+
+    dataset.save()
+
+    return True, file
 
 
-def delete_file(user_id, file_id):
+def delete_file(dataset_id, file_id):
     """
-    Deletes and Returns file by user
+    Deletes and Returns file given dataset_id
     """
-    file = File.objects.filter(id = file_id).first()
-    if file.owner_user.id != user_id:
-        return file.serialize()
-    file.status = False
-    file.save()
-    return file.serialize()
+    success, dataset = get_dataset(dataset_id)
 
+    if not success:
+        return False, None
+    
+    success, file = get_file(file_id)
+
+    if not success:
+        return False, None
+    dataset.files.remove(file)
+
+    dataset.save()
+
+    return True, file
+
+def get_file(file_id):
+    """
+    Retrieves and Returns file given file_id
+    """
+    file = file.objects.get(id = file_id)
+
+    if not file:
+        return False, file
+
+    return True, file
+
+# TODO: COMMENT
 def create_comment(user_id, comment_data):
     """
     Creates and Returns comment by user
     """
-    owner = get_user(user_id)
-    dataset = get_dataset(comment_data.get("dataset_id"))
-    comment = Comment(dataset = dataset, owner_user = owner, body = comment_data.get("body"))
+    success, dataset = get_dataset(comment_data.get("dataset_id"))
+
+    if not success:
+        return False, None
+    success, user = get_user(user_id)
+
+    if not success:
+        return False, None
+    
+    comment = Comment(user = user, dataset = dataset, body = comment_data.get("body"))
+
     comment.save()
 
-    return comment.serialize()
+    return comment
 
 def delete_comment(user_id, comment_id):
     """
     Deletes and Returns comment by user
     """
-    comment = Comment.objects.filter(id = comment_id).first()
-    if comment.owner_user.id != user_id:
-        return comment.serialize()
+    success, comment = get_comment(id = comment_id)
+    if not success or (success and comment.user.id != user_id):
+        return False, None
+    
     comment.status = False
     comment.save()
-    return comment.serialize()
+    return True, comment
 
+def get_comment(comment_id):
+    """
+    Retrieves and Returns comment given comment_id
+    """
+    comment = Comment.objects.get(id = comment_id)
+
+    if not comment:
+        return False, comment
+
+    return True, comment
+
+#TODO: like
 def create_like(user_id, like_data):
     """
     Creates and Returns like by user
     """
-    dataset = dataset = get_dataset(like_data.get("dataset_id"))
-    user = get_user(user_id)
-    like = Like.objects.filter(owner_user = user, dataset = dataset, status = True).first()
+    success, dataset = get_dataset(like_data.get("dataset_id"))
 
-    if like:
-        return False, like
+    if not success:
+        return False, None
+    success, user = get_user(user_id)
+
+    if not success:
+        return False, None
     
     like = Like(user = user, dataset = dataset)
+
     like.save()
+
     return like
+
 
 def delete_like(user_id, like_id):
     """
     Deletes and Returns like by user
     """
-
-    like = Like.objects.filter(id = like_id).first()
-    if like_id.owner_user.id != user_id:
-        return False, like
+    success, like = get_like(id = like_id)
+    if not success or (success and like.user.id != user_id):
+        return False, None
+    
     like.status = False
     like.save()
+    return True, like
 
-    return True, like.serialize()
 
+def get_like(like_id):
+    """
+    Retrieves and Returns like given like_id
+    """
+    like = like.objects.get(id = like_id)
+
+    if not like:
+        return False, like
+
+    return True, like
+
+
+# TODO: bookmark
 def create_bookmark(user_id, bookmark_data):
     """
     Creates and Returns bookmark by user
     """
-    dataset = dataset = get_dataset(bookmark_data.get("dataset_id"))
-    user = get_user(user_id)
-    bookmark = Bookmark.objects.filter(owner_user = user, dataset = dataset, status = True).first()
+    success, dataset = get_dataset(bookmark_data.get("dataset_id"))
 
-    if bookmark:
-        return False, bookmark
+    if not success:
+        return False, None
+    success, user = get_user(user_id)
+
+    if not success:
+        return False, None
     
     bookmark = Bookmark(user = user, dataset = dataset)
+
     bookmark.save()
+
     return bookmark
 
 def delete_bookmark(user_id, bookmark_id):
     """
     Deletes and Returns bookmark by user
     """
-
-    bookmark = Bookmark.objects.filter(id = bookmark_id).first()
-    if bookmark_id.owner_user.id != user_id:
-        return False, bookmark
+    success, bookmark = get_bookmark(id = bookmark_id)
+    if not success or (success and bookmark.user.id != user_id):
+        return False, None
+    
     bookmark.status = False
     bookmark.save()
+    return True, bookmark
 
-    return True, bookmark.serialize()
+def get_bookmark(bookmark_id):
+    """
+    Retrieves and Returns bookmark given bookmark_id
+    """
+    bookmark = Bookmark.objects.get(id = bookmark_id)
+
+    if not bookmark:
+        return False, bookmark
+
+    return True, bookmark
 
 def add_owner_org(user_id, dataset_data):
     """
@@ -356,3 +467,5 @@ def disapprove_dataset(user_id, dataset_id):
     return True, dataset
 
 # TODO: if depends on condition, use tuple returns else return serialized()
+
+

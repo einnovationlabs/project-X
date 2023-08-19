@@ -30,9 +30,12 @@ def create_dataset(request, user_id):
     """
     data = json.loads(request.body)
 
-    dataset = dataset_dao.create_dataset(data, user_id)
+    success, dataset = dataset_dao.create_dataset(data, user_id)
+
+    if not success:
+        return {}
     
-    return JsonResponse(dataset)
+    return JsonResponse(dataset.serialize())
 
 
 @csrf_exempt
@@ -40,7 +43,11 @@ def delete_dataset(request, dataset_id):
     """
     Endpoint to delete dataset by id
     """
-    dataset = dataset_dao.delete_dataset(dataset_id)
+    success, dataset = dataset_dao.delete_dataset(dataset_id)
+    
+    if not success:
+        return JsonResponse({})
+    
     return JsonResponse(dataset.serialize())
 
 @csrf_exempt
@@ -49,7 +56,10 @@ def update_dataset(request, dataset_id):
     Endpoint to update dataset by id
     """
     data = json.loads(request.body)
-    dataset = dataset_dao.update_dataset(dataset_id, data)
+    success, dataset = dataset_dao.update_dataset(dataset_id, data)
+
+    if not success:
+        return JsonResponse({})
 
     return JsonResponse(dataset.serialize())
 
@@ -59,8 +69,8 @@ def get_dataset(request, dataset_id):
     """
     Endpoint to get dataset by id
     """
-    dataset = dataset_dao.get_dataset(dataset_id = dataset_id)
-    return JsonResponse(dataset)
+    success, dataset = dataset_dao.get_dataset(dataset_id = dataset_id)
+    return JsonResponse(dataset.serialize())
 
 @csrf_exempt
 def get_all_datasets(request):
@@ -71,21 +81,46 @@ def get_all_datasets(request):
 
     return JsonResponse(datasets)
 
+
 @csrf_exempt
-def delete_file(request, user_id):
+def delete_file(request, dataset_id):
     """
     Endpoint to delete file 
     """
     file_id = json.loads(request.body).get("file_id")
-    return JsonResponse(dataset_dao.delete_file(user_id, file_id))
+    success, file = dataset_dao.delete_file(dataset_id, file_id)
+    return JsonResponse(file.serialize())
+
 
 @csrf_exempt
-def create_file(request, user_id):
+def create_file(request, dataset_id):
     """
     Endpoint to delete file 
     """
     file_data = json.loads(request.body)
-    return JsonResponse(dataset_dao.create_file(user_id, file_data))
+    success, file = dataset_dao.create_file(dataset_id, file_data)
+    return JsonResponse(file.serialize())
+
+
+@csrf_exempt
+def delete_tag(request, dataset_id):
+    """
+    Endpoint to delete tag 
+    """
+    tag_id = json.loads(request.body).get("tag_id")
+    success, tag = dataset_dao.delete_tag(dataset_id, tag_id)
+    return JsonResponse(tag.serialize())
+
+@csrf_exempt
+def create_tag(request, dataset_id):
+    """
+    Endpoint to delete tag 
+    """
+    tag_data = json.loads(request.body)
+    success, tag = dataset_dao.create_tag(dataset_id, tag_data)
+    return JsonResponse(tag.serialize())
+
+
     
 # Search and Filtering Endpoints
 @csrf_exempt
@@ -115,9 +150,9 @@ def create_comment(request, user_id):
     """
     data = json.loads(request.body)
 
-    comment = dataset_dao.create_comment(user_id, data)
+    success, comment = dataset_dao.create_comment(user_id, data)
     
-    return JsonResponse(comment)
+    return JsonResponse(comment.serialize())
 
 
 @csrf_exempt
@@ -126,7 +161,9 @@ def delete_comment(request, user_id):
     Endpoint to delete file 
     """
     comment_id = json.loads(request.body).get("comment_id")
-    return JsonResponse(dataset_dao.delete_comment(user_id, comment_id))
+    success, comment = dataset_dao.delete_comment(user_id, comment_id)
+
+    return JsonResponse(comment.serialize())
 
 # Like endpoints
 
@@ -137,19 +174,20 @@ def create_like(request, user_id):
     """
     data = json.loads(request.body)
 
-    comment = dataset_dao.create_like(user_id, data)
+    success, like = dataset_dao.create_like(user_id, data)
     
-    return JsonResponse(comment)
+    return JsonResponse(like.serialize())
 
 
 @csrf_exempt
 def delete_like(request, user_id):
     """
-    Endpoint to delete like 
+    Endpoint to delete file 
     """
     like_id = json.loads(request.body).get("like_id")
-    return JsonResponse(dataset_dao.delete_like(user_id, like_id))
-
+    success, like = dataset_dao.delete_like(user_id, like_id)
+    
+    return JsonResponse(like.serialize())
 
 # Bookmark endpoints
 
@@ -160,18 +198,20 @@ def create_bookmark(request, user_id):
     """
     data = json.loads(request.body)
 
-    comment = dataset_dao.create_bookmark(user_id, data)
+    success, bookmark = dataset_dao.create_bookmark(user_id, data)
     
-    return JsonResponse(comment)
+    return JsonResponse(bookmark.serialize())
 
 
 @csrf_exempt
 def delete_bookmark(request, user_id):
     """
-    Endpoint to delete bookmark 
+    Endpoint to delete file 
     """
     bookmark_id = json.loads(request.body).get("bookmark_id")
-    return JsonResponse(dataset_dao.delete_bookmark(user_id, bookmark_id))
+    success, bookmark = dataset_dao.delete_bookmark(user_id, bookmark_id)
+    
+    return JsonResponse(bookmark.serialize())
 
 
 # TODO: Data Submission Endpoints

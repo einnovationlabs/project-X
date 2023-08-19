@@ -39,7 +39,7 @@ def create_user(request):
     Endpoint to create user
     """
     data = json.loads(request.body)
-
+    
     # perform validation
     created, user = user_dao.create_user(data)
 
@@ -100,6 +100,17 @@ def user_logout(request):
     """
     Endpoint to logout user
     """
+
+@csrf_exempt
+def create_tag(request, user_id):
+    """
+    Endpoint to delete tag 
+    """
+    tag_data = json.loads(request.body)
+    success, tag = user_dao.create_tag(user_id, tag_data)
+    return JsonResponse(tag.serialize())
+
+
 # Data Submission Endpoints
 # Visualization Endpoints
 # Data Download and Export Endpoints

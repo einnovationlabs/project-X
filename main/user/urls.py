@@ -9,4 +9,6 @@ urlpatterns = [
     path('users/delete/<int:user_id>/', views.delete_user, name='delete_user'),
     path('users/update/<int:user_id>/', views.update_user, name='update_user'),
     path('users/update-user-roles/<int:user_id>/', views.update_user_role, name='update_user_roles'),
+    path('user/tags/<int:user_id>/', views.create_tag, name = "create_tag"),
+    # path('user/tags/delete/<int:user_id>/', views.delete_tag, name = "delete_tag"),
 ]

@@ -1,2 +1,7 @@
-    path('bookmarks/delete/<int:user_id>/', views.delete_bookmark, name = "delete_bookmark"),
-    path('bookmarks/<int:user_id>/', views.create_bookmark, name = "create_bookmark"),
+    for name, url in dataset_data.get("files"):
+        try:
+            file = File.objects.get(url = url)
+        except:
+            file = File(name = name, url = url) 
+        file.save()
+        dataset.files.add(file)

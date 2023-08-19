@@ -1,11 +1,14 @@
 from django.contrib import admin
-from .models import User, UserRole
-# from .models import Organization_AdminUser, Dataset_DatasetFile, Dataset_DatasetTag, Organization_OrganizationCategory, User_UserRole
+from .models import User, Role, User_Role, User_File, User_Tag
 
 # Register your models here.
-
 admin.site.register(User)
-admin.site.register(UserRole)
+admin.site.register(Role)
+admin.site.register(User_Role)
+admin.site.register(User_Tag)
+admin.site.register(User_File)
+
+
 
 
 

@@ -4,7 +4,7 @@ DAO (Data Access Object) file
 Helper file containing functions for accessing data in our database
 """
 from organization.models import Organization
-from organization.models import OrganizationCategory
+from organization.models import Category
 from user.user_dao import get_user
 
 
@@ -35,7 +35,7 @@ def create_org(org_data, admin_id):
     org.admins.add(admin)
 
     for org_type in org_data.get("categories"):
-        org_category = OrganizationCategory(
+        org_category = Category(
             type = org_type
             )
         org_category.save()

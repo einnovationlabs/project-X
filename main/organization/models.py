@@ -5,7 +5,7 @@ class Organization(models.Model):
     """
     Organization model
     """
-    organization_name = models.CharField(max_length= 100, default=None)
+    name = models.CharField(max_length= 100, default=None)
     location = models.CharField(max_length= 100, default=None)
     address = models.CharField(max_length= 100, default=None)
     phone_number = models.CharField(max_length=50, default=None)
@@ -15,10 +15,12 @@ class Organization(models.Model):
     is_deleted = models.BooleanField(default= False)
     is_approved = models.BooleanField(default=False)
 
-    categories = models.ManyToManyField("OrganizationCategory", through= "Organization_OrganizationCategory")
-    admins = models.ManyToManyField("user.User", related_name="admin_organizations", through="Organization_Admin")
-    members = models.ManyToManyField("user.User", related_name = "member_organizations", through="Organization_Members")
 
+    categories = models.ManyToManyField("Category", through= "Organization_Category")
+    admins = models.ManyToManyField("user.User", related_name="admin_organizations", through="Organization_Admin")
+    members = models.ManyToManyField("user.User", related_name = "member_organizations", through="Organization_Member")
+    tags = models.ManyToManyField("dataset.Tag", through="Organization_Tag")
+    files = models.ManyToManyField("dataset.File", through="Organization_File")
 
 
     def serialize(self):
@@ -27,7 +29,7 @@ class Organization(models.Model):
         """
         return {
             "id" : self.id,
-            "organization name" : self.organization_name,
+            "organization name" : self.name,
             "phone_number" : self.phone_number,
             "description" : self.description,
             "email" : self.email,
@@ -37,14 +39,14 @@ class Organization(models.Model):
             "is_approved" : self.is_approved,
             "categories" : [category.serialize() for category in self.categories.all()],
             "members" : [member.serialize() for member in self.members.all()],
-            "admins" : [admin.serialize() for admin in self.admins.all()]
-
+            "admins" : [admin.serialize() for admin in self.admins.all()],
+            "files" : [file.serialize() for file in self.files.all()]
         }
 
 
-class OrganizationCategory(models.Model):
+class Category(models.Model):
     """
-    Organization Category model
+    Category model
     """
     type = models.CharField(max_length=50)
 
@@ -55,14 +57,26 @@ class OrganizationCategory(models.Model):
         }
 
 
-class Organization_OrganizationCategory(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.RESTRICT)
-    organizationCategory = models.ForeignKey(OrganizationCategory, on_delete=models.RESTRICT)
+class Organization_Category(models.Model):
+    organization = models.ForeignKey("Organization", on_delete=models.RESTRICT)
+    category = models.ForeignKey("Category", on_delete=models.RESTRICT)
+
 
 class Organization_Admin(models.Model):
-    org = models.ForeignKey(Organization, on_delete=models.RESTRICT)
+    org = models.ForeignKey("Organization", on_delete=models.RESTRICT)
     admin = models.ForeignKey("user.User", on_delete=models.RESTRICT)
 
-class Organization_Members(models.Model):
-    org = models.ForeignKey(Organization, on_delete=models.RESTRICT)
+
+class Organization_Member(models.Model):
+    org = models.ForeignKey("Organization", on_delete=models.RESTRICT)
     members = models.ForeignKey("user.User", on_delete=models.RESTRICT)
+
+
+class Organization_Tag(models.Model):
+    tags = models.ForeignKey("dataset.Tag", on_delete=models.RESTRICT)
+    org = models.ForeignKey("Organization", on_delete=models.RESTRICT)
+
+
+class Organization_File(models.Model):
+    files = models.ForeignKey("dataset.File", on_delete=models.RESTRICT)
+    org = models.ForeignKey("Organization", on_delete=models.RESTRICT)

@@ -16,13 +16,16 @@ class User(models.Model):
     email = models.EmailField(null= True, unique=True)
     about = models.CharField(max_length= 1000, blank= True, null= True)
     is_deleted = models.BooleanField(default= False)
-    roles = models.ManyToManyField("UserRole", through="User_UserRole")
 
+    roles = models.ManyToManyField("Role", through="User_Role")
+    tags = models.ManyToManyField("dataset.Tag", through="User_Tag")
+    files = models.ManyToManyField("dataset.File", through="User_File")
 
 
     def serialize(self):
 
         return {
+            
             "id":  self.id,
             "phone_number" : self.phone_number,
             "profile_picture" : self.profile_pic,
@@ -33,41 +36,39 @@ class User(models.Model):
             "email" : self.email,
             "about" : self.about,
             "is_deleted" : self.is_deleted,
-            "roles" : [role.serialize() for role in self.roles.all()]
-        }  #TODO: user has just a role 
+            "bookmarks" : [bookmark.serialize() for bookmark in self.user_bookmarks.all()],
+            "likes" : [like.serialize() for like in self.user_likes.all()],
+            "comments" : [comment.serialize() for comment in self.user_comments.all()],
+            "roles" : [role.serialize() for role in self.roles.all()],
+            "tags" : [tag.serialize() for tag in self.tags.all()],
+            "files" : [file.serialize() for file in self.files.all()],
+        }  
 
 
-class UserRole(models.Model):
+
+class Role(models.Model):
     """
-    User role model
+    Role model
     """
-    profile_user = models.BooleanField(default= True)
-    org_contributor = models.BooleanField(default=False)
-    org_admin = models.BooleanField(default=False)
-    super_admin = models.BooleanField(default=False)
+    name = models.CharField(max_length=20, default="PROFILE_USER")
 
     def serialize(self):
         return {
             "id" : self.id,
-            "profile_user" : self.profile_user,
-            "org_contributor" : self.org_contributor,
-            "org_admin" : self.org_admin,
-            "super_admin" : self.super_admin
+            "role" : self.name
         }
 
 
+class User_Role(models.Model):
+    users = models.ForeignKey(User, on_delete=models.RESTRICT,default=None)
+    roles = models.ForeignKey(Role, on_delete=models.RESTRICT,default=None)
 
 
-
-#     # Add any extra fields or attributes you want for this relationship
-#     # extra_field = models.CharField(max_length=100)
-
-
-class User_UserRole(models.Model):
-    user = models.ForeignKey(User, on_delete=models.RESTRICT)
-    user_role = models.ForeignKey(UserRole, on_delete=models.RESTRICT)
+class User_Tag(models.Model):
+    tags = models.ForeignKey("dataset.Tag", on_delete = models.RESTRICT)
+    users = models.ForeignKey("User", on_delete=models.RESTRICT)
 
 
-
-
-
+class User_File(models.Model):
+    files = models.ForeignKey("dataset.File", on_delete=models.RESTRICT)
+    users = models.ForeignKey("User", on_delete=models.RESTRICT)
