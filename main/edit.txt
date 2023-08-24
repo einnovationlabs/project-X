@@ -1,0 +1,7 @@
+    for name, url in dataset_data.get("files"):
+        try:
+            file = File.objects.get(url = url)
+        except:
+            file = File(name = name, url = url) 
+        file.save()
+        dataset.files.add(file)
