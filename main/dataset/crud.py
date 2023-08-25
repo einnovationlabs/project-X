@@ -7,11 +7,13 @@ from dataset.models import Dataset
 from dataset.models import File
 from dataset.models import Tag
 from dataset.models import DatasetMetadata
-from user.user_dao import get_user
+from user.crud import get_user
 from dataset.models import Comment
 from dataset.models import Like
 from dataset.models import Bookmark
 from organization.organization_dao import get_org
+
+
 def create_dataset(dataset_data, user_id):
     """
     Creates dataset given dataset_data
@@ -23,7 +25,6 @@ def create_dataset(dataset_data, user_id):
 
     metadata = DatasetMetadata(
             metadata_file = dataset_data.get("metadata").get("metadata_file"),
-            metadata_title = dataset_data.get("metadata").get("metadata_title"),
             metadata_blurb = dataset_data.get("metadata").get("metadata_blurb"),
             metadata_source_link = dataset_data.get("metadata").get("metadata_source_link"),
             metadata_resource_type = dataset_data.get("metadata").get("metadata_resource_type"),
@@ -38,6 +39,8 @@ def create_dataset(dataset_data, user_id):
             has_user_policy = dataset_data.get('has_user_policy'), 
             is_government = dataset_data.get('is_government'),
             is_public = dataset_data.get('is_public'),
+            title=dataset_data.get('title'),
+            description=dataset_data.get('description'),
             status = dataset_data.get('status'),
             addt_info = dataset_data.get('addt_info'),
             owner_user = owner_user,
@@ -106,7 +109,7 @@ def delete_dataset(dataset_id):
     dataset = Dataset.objects.get(id = dataset_id)
     dataset.is_deleted = True
     dataset.save()
-
+    dataset = Dataset.objects.get(id = dataset_id)
     return dataset
 
 
@@ -130,20 +133,21 @@ def get_dataset(dataset_id):
     likes = []
     for like in Like.objects.filter(dataset = dataset).all():
         likes.append(like.serialize())
-    res = {
-        "dataset" : dataset.serialize(),
-        "dataset_comments" : comments,
-        "dataset_tags" : tags,
-        "dataset_files" : files,
-        "dataset_likes" : likes,
+        
+    return {
+        "data" : dataset.serialize(),
+        "comments" : comments,
+        "tags" : tags,
+        "files" : files,
+        "likes" : likes,
     }
-    return res
+    
 
 def get_all_datasets():
     """
     Retrieves and Returns all datasets
     """
-    datasets = Dataset.objects.all()
+    datasets = Dataset.objects.filter(is_deleted=False).all()
     res = []
 
     for dataset in datasets:

@@ -37,6 +37,7 @@ def create_user(user_data):
     user.roles.add(user_role)
 
     user.save()
+    print("ghsdgfhgwauerugweuirt")
     return True, user
 
 
@@ -111,3 +112,15 @@ def get_user(user_id):
         return False, user
     
     return True, user
+
+def get_users():
+    """
+    Retrieves and Returns User given user_id
+    """
+    users = User.objects.all()
+    res = []
+
+    for user in users:
+        res.append(user.serialize())
+
+    return {"users" : res}

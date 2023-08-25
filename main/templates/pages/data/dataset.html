@@ -44,7 +44,7 @@
 
     <main class="container mt-5">
         <div class="d-flex justify-content-between">
-            <h2>Electric Vehicle Data</h2>
+            <h2>{{dataset.data.title}}</h2>
             <div class="justify-content-end">
                 <img class="me-2" style="width: 32px; height: 32px" src="https://cdn-icons-png.flaticon.com/128/3179/3179391.png" alt="">
                 <!-- <img class="me-2" style="width: 25px; height: 25px" src="https://cdn-icons-png.flaticon.com/128/3601/3601571.png" alt=""> -->
@@ -55,7 +55,7 @@
                 <img style="width: 25px; height: 25px" src="https://cdn-icons-png.flaticon.com/128/1828/1828959.png" alt="">
             </div>
         </div>
-        <h5>This dataset shows the Battery Electric Vehicles (BEVs) and Plug-in Hybrid Electric Vehicles (PHEVs) that are currently registered through Washington State Department of Licensing (DOL).</h5>
+        <h5>{{dataset.data.description}}</h5>
         <h4 class="mt-5">Access & Use Information</h4>
         <h5><strong>Public:</strong> This dataset is intended for public access and use.</h5>
         <h5><strong>Non-Federal:</strong> This dataset is covered by different Terms of Use than Data.gov.</h5>
@@ -116,11 +116,11 @@
                         </tr>
                         <tr>
                           <td>Metadata Created Page</td>
-                          <td class="text-muted">November 10, 2020</td>
+                          <td class="text-muted">{{dataset.data.dataset_metadata.date_created}}</td>
                         </tr>
                         <tr>
                           <td>Metadata Updated Page</td>
-                          <td class="text-muted">June 10, 2023</td>
+                          <td class="text-muted">{{dataset.data.dataset_metadata.date_modified}}</td>
                         </tr>
                         <tr>
                           <td>Publisher</td>

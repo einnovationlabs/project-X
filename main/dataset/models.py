@@ -17,6 +17,9 @@ class Dataset(models.Model):
     is_archived = models.BooleanField(default= True)
     is_approved = models.BooleanField(default=False)
 
+    title = models.CharField(max_length= 100, default="")  
+
+    description = models.CharField(max_length= 1000, default="")  
 
     status = models.TextField(default=None)  #make it choices
 
@@ -45,6 +48,8 @@ class Dataset(models.Model):
             "is_published" : self.is_published,
             "is_archived" : self.is_archived,
             "is_approved" : self.is_approved,
+            "title": self.title,
+            "description": self.description,
             "status" : self.status,
             "is_deleted" : self.is_deleted,
             "addt_info" : self.addt_info,
@@ -124,7 +129,6 @@ class DatasetMetadata(models.Model):
     Dataset Metadata model
     """
     metadata_file = models.CharField(max_length= 50, null=True)  #relation with file model
-    metadata_title = models.CharField(max_length= 100)  
     metadata_blurb = models.CharField(max_length= 1000, blank= True, null= True)
     metadata_source_link = models.URLField()
     metadata_resource_type = models.CharField(max_length=50)
