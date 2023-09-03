@@ -4,7 +4,6 @@ DAO (Data Access Object) file
 Helper file containing functions for accessing data in our database
 """
 from organization.models import Organization
-from organization.models import OrganizationCategory
 from user.crud import get_user
 
 

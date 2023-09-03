@@ -6,9 +6,6 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
 
-# Create your views here.
-
-
 from django.shortcuts import render
 from django.http import HttpResponse
 import dataset.crud as crud
@@ -54,9 +51,7 @@ def get_dataset(request, dataset_id):
     """
     Endpoint to get dataset by id
     """
-    # dataset = 
     return render(request, "pages/data/dataset.html", {"dataset": crud.get_dataset(dataset_id = dataset_id)})
-    # {"g": }
 
 @csrf_exempt
 def get_all_datasets(request):

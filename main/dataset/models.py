@@ -31,7 +31,7 @@ class Dataset(models.Model):
     owner_user = models.ForeignKey("user.User", on_delete=models.RESTRICT, default=None)
 
 
-    metadata = models.ForeignKey("Metadata", on_delete=models.RESTRICT, unique= True, blank= False)
+    metadata = models.ForeignKey("Dataset_Metadata", on_delete=models.RESTRICT, unique= True, blank= False)
     
     tags = models.ManyToManyField("Tag",  through="Dataset_Tag")
     files = models.ManyToManyField("File", through="Dataset_File")
@@ -121,7 +121,7 @@ class Comment(models.Model):
         }
 
 
-class Metadata(models.Model):
+class Dataset_Metadata(models.Model):
     """
     Metadata model
     """

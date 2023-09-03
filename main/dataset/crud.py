@@ -6,7 +6,7 @@ Helper file containing functions for accessing data in our database
 from dataset.models import Dataset
 from dataset.models import File
 from dataset.models import Tag
-from dataset.models import DatasetMetadata
+from dataset.models import Dataset_Metadata
 from user.crud import get_user
 from dataset.models import Comment
 from dataset.models import Like
@@ -23,7 +23,7 @@ def create_dataset(dataset_data, user_id):
     if not exists:
         return False, None
 
-    metadata = DatasetMetadata(
+    metadata = Dataset_Metadata(
             metadata_file = dataset_data.get("metadata").get("metadata_file"),
             metadata_blurb = dataset_data.get("metadata").get("metadata_blurb"),
             metadata_source_link = dataset_data.get("metadata").get("metadata_source_link"),
@@ -149,6 +149,8 @@ def get_all_datasets():
     """
     datasets = Dataset.objects.filter(is_deleted=False).all()
     res = []
+    
+    print("***********************************************************************************")
 
     for dataset in datasets:
         res.append(dataset.serialize())

@@ -4,7 +4,7 @@ DAO (Data Access Object) file
 Helper file containing functions for accessing data in our database
 """
 from user.models import User
-from user.models import UserRole
+from user.models import User_Role
 
 def create_user(user_data):
     """
@@ -27,7 +27,7 @@ def create_user(user_data):
     #become org_contributor on creation
     #become org admin on addition or creation of org
     #become super admin ???
-    user_role = UserRole(
+    user_role = User_Role(
         org_contributor = user_data.get("roles").get("organization_contributor"),
         org_admin = user_data.get("roles").get("organization_admin"),
         super_admin = user_data.get("roles").get("super_admin")
