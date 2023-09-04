@@ -1,8 +1,3 @@
-"""
-DAO (Data Access Object) file
-
-Helper file containing functions for accessing data in our database
-"""
 from apps.user.models import User
 from apps.user.models import User_Role
 
@@ -28,11 +23,7 @@ def create_user(user_data):
     #become org_contributor on creation
     #become org admin on addition or creation of org
     #become super admin ???
-    user_role = User_Role(
-        org_contributor = user_data.get("roles").get("organization_contributor"),
-        org_admin = user_data.get("roles").get("organization_admin"),
-        super_admin = user_data.get("roles").get("super_admin")
-    )
+    user_role = User_Role()
 
     user_role.save()
     user.roles.add(user_role)

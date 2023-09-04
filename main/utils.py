@@ -1,3 +1,5 @@
+from django.http import JsonResponse
+
 def success_response(data):
     return JsonResponse(data)
 
