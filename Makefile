@@ -3,9 +3,9 @@ init:
 	touch main/.env
 .PHONY: init
 
-start:
+run:
 	python3 main/manage.py runserver
-.PHONY: start
+.PHONY: run
 
 migrate:
 	python3 main/manage.py makemigrations

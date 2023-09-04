@@ -7,10 +7,3 @@ admin.site.register(Role)
 admin.site.register(User_Role)
 admin.site.register(User_Tag)
 admin.site.register(User_File)
-
-
-
-
-
-
-

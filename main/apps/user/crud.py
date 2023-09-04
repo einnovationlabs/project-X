@@ -3,8 +3,8 @@ DAO (Data Access Object) file
 
 Helper file containing functions for accessing data in our database
 """
-from user.models import User
-from user.models import User_Role
+from apps.user.models import User
+from apps.user.models import User_Role
 
 def create_user(user_data):
     """
@@ -22,6 +22,7 @@ def create_user(user_data):
             email = user_data.get("email"),
             about = user_data.get("about")
             )
+            
     user.save()
 
     #become org_contributor on creation
@@ -37,81 +38,68 @@ def create_user(user_data):
     user.roles.add(user_role)
 
     user.save()
-    print("ghsdgfhgwauerugweuirt")
-    return True, user
+    return user
 
 
 def update_user(user_id, user_data):
     """
     Updates and Returns User given user_id and user_data
     """
-    exists, user = get_user(user_id)
+    user = get_user(user_id)
 
-    if not exists:
-        return False, user
+    if  user:
+        user.firstname = user_data.get('firstname')
+        user.lastname = user_data.get('lastname')
+        user.username = user_data.get('username')
+        user.password_digest = user_data.get('password')
+        user.about = user_data.get('about')
+        user.email = user_data.get('email')
+        user.phone_number = user_data.get('phone_number')
+        user.profile_pic = user_data.get('profile_pic')
+        user.background_pic = user_data.get('background_pic')
 
+        user.save()
 
-    user.firstname = user_data.get('firstname')
-    user.lastname = user_data.get('lastname')
-    user.username = user_data.get('username')
-    user.password_digest = user_data.get('password')
-    user.about = user_data.get('about')
-    user.email = user_data.get('email')
-    user.phone_number = user_data.get('phone_number')
-    user.profile_pic = user_data.get('profile_pic')
-    user.background_pic = user_data.get('background_pic')
-
-    user.save()
-
-    return True, user
+    return user
 
 def update_user_role(user_id, user_data):
     """
     Updates user roles and Returns User given user_id and user_data
     """
-    exists, user = get_user(user_id)
+    user = get_user(user_id)
 
     if not exists:
-        return False, user
-    #TODO: need to reconsider this
-    roles = user.roles 
+        res = []
+        roles = user.roles 
+        for role in roles.all():
+            role.org_contributor = user_data.get("organization_contributor")
+            role.org_admin = user_data.get("organization_admin")
+            role.super_admin = user_data.get("super_admin")
+            role.save()
+            res.append(role.serialize())
 
-    res = []
-    for role in roles.all():
-        role.org_contributor = user_data.get("organization_contributor")
-        role.org_admin = user_data.get("organization_admin")
-        role.super_admin = user_data.get("super_admin")
-        role.save()
-        res.append(role.serialize())
-
-
-    return True, {"user_id:" : user.id, "user_roles" : res}
+        return  {"user_id:" : user.id, "user_roles" : res}
+    return {}
 
 
 def delete_user(user_id):
     """
     Deletes and Returns User given user_id
     """
-    exists, user = get_user(user_id)
+    user = get_user(user_id)
 
-    if not exists:
-        return False, user
-    
-    user.is_deleted = True
-    user.save()
-    return True, user
+    if user:    
+        user.is_deleted = True
+        user.save()
+    return  user
 
 
 def get_user(user_id):
     """
     Retrieves and Returns User given user_id
     """
-    user = User.objects.get(id = user_id)
+    return User.objects.get(id = user_id)
 
-    if not user:
-        return False, user
-    
-    return True, user
 
 def get_users():
     """

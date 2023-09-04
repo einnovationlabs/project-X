@@ -1,14 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from dataset.models import Dataset
-import dataset.crud as crud
+from apps.dataset.models import Dataset
+import apps.dataset.crud as crud
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
 
 from django.shortcuts import render
 from django.http import HttpResponse
-import dataset.crud as crud
+import apps.dataset.crud as crud
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
@@ -21,7 +21,6 @@ def create_dataset(request, user_id):
     Endpoint to create dataset
     """
     data = json.loads(request.body)
-
     dataset = crud.create_dataset(data, user_id)
     
     return JsonResponse(dataset[1])

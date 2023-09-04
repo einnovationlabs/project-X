@@ -3,8 +3,8 @@ DAO (Data Access Object) file
 
 Helper file containing functions for accessing data in our database
 """
-from organization.models import Organization
-from user.crud import get_user
+from apps.organization.models import Organization
+from apps.user.crud import get_user
 
 
 def create_org(org_data, admin_id):

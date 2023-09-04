@@ -3,15 +3,15 @@ DAO (Data Access Object) file
 
 Helper file containing functions for accessing data in our database
 """
-from dataset.models import Dataset
-from dataset.models import File
-from dataset.models import Tag
-from dataset.models import Dataset_Metadata
-from user.crud import get_user
-from dataset.models import Comment
-from dataset.models import Like
-from dataset.models import Bookmark
-from organization.organization_dao import get_org
+from apps.dataset.models import Dataset
+from apps.dataset.models import File
+from apps.dataset.models import Tag
+from apps.dataset.models import Dataset_Metadata
+from apps.user.crud import get_user
+from apps.dataset.models import Comment
+from apps.dataset.models import Like
+from apps.dataset.models import Bookmark
+from apps.organization.crud import get_org
 
 
 def create_dataset(dataset_data, user_id):
