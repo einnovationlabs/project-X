@@ -4,8 +4,8 @@ from . import views
 urlpatterns = [
     path('datasets/<int:user_id>/', views.create_dataset, name = "create_dataset"),
     path('datasets/get/<int:dataset_id>/', views.get_dataset, name = "get_dataset"),
-    path('datasets/delete/<int:dataset_id>/', views.delete_dataset, name = "delete_dataset"),
-    path('datasets/update/<int:dataset_id>/', views.update_dataset, name = "update_dataset"),
+    path('datasets.delete/<int:dataset_id>/', views.delete_dataset, name = "delete_dataset"),
+    path('datasets.update/<int:dataset_id>/', views.update_dataset, name = "update_dataset"),
     path('datasets/', views.get_all_datasets, name = "get_all_datasets"),
     path('files/delete/<int:user_id>/', views.delete_file, name = "delete_file"),
     path('files/<int:user_id>/', views.create_file, name = "create_file"),
