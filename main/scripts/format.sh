@@ -6,19 +6,17 @@
 #* Show trace in terminal
 set -x
 
+cd ..
+
 #* Sort imports one per line, so autoflake can remove unused imports
-# isort --recursive  --force-single-line-imports --apply app
-autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place app --exclude=__init__.py,base.py
+isort . 
+autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place . --exclude=__init__.py,base.py
 
 #* Lint with black and sirt with isort again
-black app
-isort --recursive --apply app
+black .
+isort --recursive --apply .
 
 #* Affirm typing, linnting and formatting
-# mypy app
-black app --check
-isort --recursive --check-only app
+black . --check
+isort --recursive --check-only .
 flake8
-
-#* Test coverage generated via HTML
-# pytest --cov=app --cov-report=html app/tests "${@}"

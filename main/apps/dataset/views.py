@@ -1,17 +1,9 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from apps.dataset.models import Dataset
-import apps.dataset.crud as crud
-from django.views.decorators.csrf import csrf_exempt
 import json
-from django.http import JsonResponse
 
-from django.shortcuts import render
-from django.http import HttpResponse
 import apps.dataset.crud as crud
-from django.views.decorators.csrf import csrf_exempt
-import json
 from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 
 
 ##### DATASETS ENDPOINTS #####
@@ -22,7 +14,7 @@ def create_dataset(request, user_id):
     """
     data = json.loads(request.body)
     dataset = crud.create_dataset(data, user_id)
-    
+
     return JsonResponse(dataset[1])
 
 
@@ -33,6 +25,7 @@ def delete_dataset(request, dataset_id):
     """
     dataset = crud.delete_dataset(dataset_id)
     return JsonResponse(dataset.serialize())
+
 
 @csrf_exempt
 def update_dataset(request, dataset_id):
@@ -50,7 +43,12 @@ def get_dataset(request, dataset_id):
     """
     Endpoint to get dataset by id
     """
-    return render(request, "pages/data/dataset.html", {"dataset": crud.get_dataset(dataset_id = dataset_id)})
+    return render(
+        request,
+        "pages/data/dataset.html",
+        {"dataset": crud.get_dataset(dataset_id=dataset_id)},
+    )
+
 
 @csrf_exempt
 def get_all_datasets(request):
@@ -60,22 +58,25 @@ def get_all_datasets(request):
     all_datasets = crud.get_all_datasets()
     return render(request, "pages/data/catalog.html", all_datasets)
 
+
 @csrf_exempt
 def delete_file(request, dataset_id):
     """
-    Endpoint to delete file 
+    Endpoint to delete file
     """
     file_id = json.loads(request.body).get("file_id")
     return JsonResponse(crud.delete_file(user_id, file_id))
 
+
 @csrf_exempt
 def create_file(request, dataset_id):
     """
-    Endpoint to delete file 
+    Endpoint to delete file
     """
     file_data = json.loads(request.body)
     return JsonResponse(crud.create_file(user_id, file_data))
-    
+
+
 # Search and Filtering Endpoints
 @csrf_exempt
 def search_dataset_by_category(request):
@@ -83,11 +84,13 @@ def search_dataset_by_category(request):
     Endpoint to search datasets by category
     """
 
+
 @csrf_exempt
 def filter_dataset_by_source(request):
     """
     Endpoint to filter datasets by source
     """
+
 
 @csrf_exempt
 def filter_dataset_by_date_range(request):
@@ -95,7 +98,9 @@ def filter_dataset_by_date_range(request):
     Endpoint to filter datasets by date range
     """
 
+
 # Comment endpoints
+
 
 @csrf_exempt
 def create_comment(request, user_id):
@@ -105,19 +110,21 @@ def create_comment(request, user_id):
     data = json.loads(request.body)
 
     comment = crud.create_comment(user_id, data)
-    
+
     return JsonResponse(comment.serialize())
 
 
 @csrf_exempt
 def delete_comment(request, user_id):
     """
-    Endpoint to delete file 
+    Endpoint to delete file
     """
     comment_id = json.loads(request.body).get("comment_id")
     return JsonResponse(crud.delete_comment(user_id, comment_id))
 
+
 # Like endpoints
+
 
 @csrf_exempt
 def create_like(request, user_id):
@@ -126,21 +133,22 @@ def create_like(request, user_id):
     """
     data = json.loads(request.body)
 
-    comment = crud.create_like(user_id, data)
-    
+    crud.create_like(user_id, data)
+
     return JsonResponse(like.serialize())
 
 
 @csrf_exempt
 def delete_like(request, user_id):
     """
-    Endpoint to delete file 
+    Endpoint to delete file
     """
     like_id = json.loads(request.body).get("like_id")
     return JsonResponse(crud.delete_like(user_id, like_id))
 
 
 # Bookmark endpoints
+
 
 @csrf_exempt
 def create_bookmark(request, user_id):
@@ -149,15 +157,15 @@ def create_bookmark(request, user_id):
     """
     data = json.loads(request.body)
 
-    comment = crud.create_bookmark(user_id, data)
-    
+    crud.create_bookmark(user_id, data)
+
     return JsonResponse(bookmark.serialize())
 
 
 @csrf_exempt
 def delete_bookmark(request, user_id):
     """
-    Endpoint to delete file 
+    Endpoint to delete file
     """
     bookmark_id = json.loads(request.body).get("bookmark_id")
     return JsonResponse(crud.delete_bookmark(user_id, bookmark_id))

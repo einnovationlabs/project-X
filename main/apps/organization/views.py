@@ -1,10 +1,9 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+import json
+
 import apps.organization.crud as organization_dao
 from django.views.decorators.csrf import csrf_exempt
-import json
-from django.http import JsonResponse
-from utils import success_response, error_response
+from utils import error_response, success_response
+
 
 # Organization Management endpoints
 @csrf_exempt
@@ -19,7 +18,7 @@ def create_org(request, admin_id):
 
     if not success_response:
         return error_response("Failed to create organization")
-    
+
     return success_response(org.serialize())
 
 
@@ -30,7 +29,7 @@ def delete_org(request, org_id):
     """
     deleted, org = organization_dao.delete_org(org_id)
 
-    if not deleted: #TODO:only admin/super admin can delete it 
+    if not deleted:  # TODO:only admin/super admin can delete it
         return error_response("Failed to delete organization")
 
     return success_response(org.serialize())
@@ -59,7 +58,7 @@ def get_org(request, org_id):
 
     if not success:
         return error_response("Failed to get organization")
-    
+
     return success_response(org.serialize())
 
 
@@ -87,7 +86,5 @@ def remove_org_member(request, admin_id):
 
     if not success:
         return error_response("Failed to remove member")
-    
+
     return success_response(member.serialize())
-
-

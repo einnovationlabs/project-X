@@ -1,46 +1,50 @@
 from django.db import models
 
+
 # Create your models here.
 class Organization(models.Model):
     """
     Organization model
     """
-    name = models.CharField(max_length= 100, default=None)
-    location = models.CharField(max_length= 100, default=None)
-    address = models.CharField(max_length= 100, default=None)
+
+    name = models.CharField(max_length=100, default=None)
+    location = models.CharField(max_length=100, default=None)
+    address = models.CharField(max_length=100, default=None)
     phone_number = models.CharField(max_length=50, default=None)
     email = models.EmailField(default=None)
-    password = models.CharField(max_length= 50, default=None)
-    description = models.CharField(max_length= 1000, blank= True, null= True)
-    is_deleted = models.BooleanField(default= False)
+    password = models.CharField(max_length=50, default=None)
+    description = models.CharField(max_length=1000, blank=True, null=True)
+    is_deleted = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
 
-
-    categories = models.ManyToManyField("Category", through= "Organization_Category")
-    admins = models.ManyToManyField("user.User", related_name="admin_organizations", through="Organization_Admin")
-    members = models.ManyToManyField("user.User", related_name = "member_organizations", through="Organization_Member")
+    categories = models.ManyToManyField("Category", through="Organization_Category")
+    admins = models.ManyToManyField(
+        "user.User", related_name="admin_organizations", through="Organization_Admin"
+    )
+    members = models.ManyToManyField(
+        "user.User", related_name="member_organizations", through="Organization_Member"
+    )
     tags = models.ManyToManyField("dataset.Tag", through="Organization_Tag")
     files = models.ManyToManyField("dataset.File", through="Organization_File")
-
 
     def serialize(self):
         """
         Serializes Organization object
         """
         return {
-            "id" : self.id,
-            "organization name" : self.name,
-            "phone_number" : self.phone_number,
-            "description" : self.description,
-            "email" : self.email,
-            "location" : self.location,
-            "address" : self.address,
-            "is_deleted" : self.is_deleted,
-            "is_approved" : self.is_approved,
-            "categories" : [category.serialize() for category in self.categories.all()],
-            "members" : [member.serialize() for member in self.members.all()],
-            "admins" : [admin.serialize() for admin in self.admins.all()],
-            "files" : [file.serialize() for file in self.files.all()]
+            "id": self.id,
+            "organization name": self.name,
+            "phone_number": self.phone_number,
+            "description": self.description,
+            "email": self.email,
+            "location": self.location,
+            "address": self.address,
+            "is_deleted": self.is_deleted,
+            "is_approved": self.is_approved,
+            "categories": [category.serialize() for category in self.categories.all()],
+            "members": [member.serialize() for member in self.members.all()],
+            "admins": [admin.serialize() for admin in self.admins.all()],
+            "files": [file.serialize() for file in self.files.all()],
         }
 
 
@@ -48,13 +52,11 @@ class Category(models.Model):
     """
     Category model
     """
+
     type = models.CharField(max_length=50)
 
     def serialize(self):
-        return {
-            "id" : self.id,
-            "type" : self.type
-        }
+        return {"id": self.id, "type": self.type}
 
 
 class Organization_Category(models.Model):
