@@ -1,80 +1,67 @@
-"""
-DAO (Data Access Object) file
-
-Helper file containing functions for accessing data in our database
-"""
 from apps.dataset.models import (Bookmark, Comment, Dataset, Dataset_Metadata,
                                  File, Like, Tag)
 from apps.organization.crud import get_org
+from apps.user.crud import get_user
 
 
-def _create_dataset_files(files):
-    dataset_files = []
-    for dataset_title, url in files:
-        file = File(title=dataset_title, file_url=url, owner_user=owner_user)
+def _create_dataset_files(dataset_id, files):
+    print(files)
+    if not files:
+        return []
+
+    res = []
+    for title, url in files:
+        file = File(title=title, file_url=url, owner_user=owner_user)
         file.save()
-        dataset_files.append(file)
+        res.append(file)
 
-
-def _create_dataset_tags(tags):
-    dataset_tags = []
-    for tag_name in dataset_tags:
-        tag = Tag(name=tag_name)
-        tag.save()
-        tags.append(tag)
-
-
-def create_dataset(data, user_id):
-    """
-    Creates dataset given data
-    """
-    owner = get_user(user_id)
-    if not owner:
-        raise
-
-    metadata = Dataset_Metadata(
-        metadata_file=data.get("metadata").get("metadata_file"),
-        metadata_blurb=data.get("metadata").get("metadata_blurb"),
-        metadata_source_link=data.get("metadata").get("metadata_source_link"),
-        metadata_resource_type=data.get("metadata").get("metadata_resource_type"),
-        publisher=data.get("metadata").get("publisher"),
-        maintainer=data.get("metadata").get("maintainer"),
-        license_link=data.get("metadata").get("license_link"),
-    )
-    metadata.save()
-
-    dataset = Dataset(
-        is_verified=data.get("is_verified"),
-        has_user_policy=data.get("has_user_policy"),
-        is_government=data.get("is_government"),
-        is_public=data.get("is_public"),
-        title=data.get("title"),
-        description=data.get("description"),
-        status=data.get("status"),
-        addt_info=data.get("addt_info"),
-        owner_user=owner,
-        dataset_metadata=metadata,
-    )
-
-    dataset.files = _create_dataset_files(data.get("files"))
-    dataset.tags = _create_dataset_tags(data.get("tags"))
-
-    dataset.save()
-
-    res = {"dataset": dataset.serialize(), "dataset_tags": tags, "dataset_files": files}
     return res
 
 
-def update_dataset(dataset_id, dataset_data):
-    """
-    Updates and returns dataset given dataset_id and dataset_data
-    """
-    dataset = Dataset.objects.get(id=dataset_id)
+def _create_dataset_tags(dataset_id, tags):
+    if not tags:
+        return []
 
-    metadata = dataset.dataset_metadata
-    metadata.metadata_file = dataset_data.get("metadata").get("metadata_file")
-    metadata.metadata_title = dataset_data.get("metadata").get("metadata_title")
-    metadata.metadata_blurb = dataset_data.get("metadata").get("metadata_blurb")
+    res = []
+    for name in dataset_tags:
+        tag = Tag(name=name)
+        tag.save()
+        res.append(tag)
+
+    return res
+
+
+def create_dataset(data, user_id):
+    owner = get_user(user_id)
+    if not owner:
+        return
+
+    dataset = Dataset()
+    for field in Dataset.single_fields:
+        setattr(dataset, field, data.get(field))
+
+    dataset.owner_user = owner
+    metadata = Dataset_Metadata(**data.get("metadata"))
+    metadata.save()
+    dataset.metadata = metadata
+    dataset.save()
+
+    _create_dataset_files(dataset.id, data.get("files"))
+    _create_dataset_tags(dataset.id, data.get("tags"))
+
+    return {
+        "dataset": dataset.serialize(),
+        "dataset_tags": dataset.tags,
+        "dataset_files": dataset.files,
+    }
+
+
+def update_dataset_metadata(metadata, data):
+    metadata.file = dataset_data.get("metadata").get("file")
+    metadata.metadata_title = dataset_data.get(
+        "metadata").get("metadata_title")
+    metadata.metadata_blurb = dataset_data.get(
+        "metadata").get("metadata_blurb")
     metadata.metadata_source_link = dataset_data.get("metadata").get(
         "metadata_source_link"
     )
@@ -87,18 +74,17 @@ def update_dataset(dataset_id, dataset_data):
 
     metadata.save()
 
-    dataset.is_verified = dataset_data.get("is_verified")
-    dataset.has_user_policy = dataset_data.get("has_user_policy")
-    dataset.is_government = dataset_data.get("is_government")
-    dataset.is_public = dataset_data.get("is_public")
-    dataset.status = dataset_data.get("status")
-    dataset.addt_info = dataset_data.get("addt_info")
-    dataset.number_of_likes = dataset_data.get("number_of_likes")
-    dataset.csv_file_url = dataset_data.get("csv_file_url")
+
+def update_dataset(dataset_id, data):
+    dataset = Dataset.objects.get(id=dataset_id)
+    if not dataset:
+        return None
+
+    for field in Dataset.single_fields:
+        setattr(dataset, field, data.get(field))
 
     dataset.save()
-
-    return dataset
+    return {"dataset": dataset}
 
 
 def delete_dataset(dataset_id):
@@ -106,7 +92,7 @@ def delete_dataset(dataset_id):
     dataset.is_deleted = True
     dataset.save()
     dataset = Dataset.objects.get(id=dataset_id)
-    return dataset
+    return {"dataset": dataset}
 
 
 def get_dataset(dataset_id):
@@ -150,9 +136,6 @@ def create_file(user_id, file_data):
 
 
 def delete_file(user_id, file_id):
-    """
-    Deletes and Returns file by user
-    """
     file = File.objects.filter(id=file_id).first()
     if file.owner_user.id != user_id:
         return file.serialize()
@@ -167,7 +150,8 @@ def create_comment(user_id, comment_data):
     """
     owner = get_user(user_id)
     dataset = get_dataset(comment_data.get("dataset_id"))
-    comment = Comment(dataset=dataset, owner_user=owner, body=comment_data.get("body"))
+    comment = Comment(dataset=dataset, owner_user=owner,
+                      body=comment_data.get("body"))
     comment.save()
 
     return comment.serialize()
@@ -191,10 +175,11 @@ def create_like(user_id, like_data):
     """
     dataset = dataset = get_dataset(like_data.get("dataset_id"))
     user = get_user(user_id)
-    like = Like.objects.filter(owner_user=user, dataset=dataset, status=True).first()
+    like = Like.objects.filter(
+        owner_user=user, dataset=dataset, status=True).first()
 
     if like:
-        return False, like
+        return like
 
     like = Like(user=user, dataset=dataset)
     like.save()
@@ -208,11 +193,11 @@ def delete_like(user_id, like_id):
 
     like = Like.objects.filter(id=like_id).first()
     if like_id.owner_user.id != user_id:
-        return False, like
+        return like
     like.status = False
     like.save()
 
-    return True, like.serialize()
+    return like.serialize()
 
 
 def create_bookmark(user_id, bookmark_data):
@@ -226,7 +211,7 @@ def create_bookmark(user_id, bookmark_data):
     ).first()
 
     if bookmark:
-        return False, bookmark
+        return bookmark
 
     bookmark = Bookmark(user=user, dataset=dataset)
     bookmark.save()
@@ -240,11 +225,11 @@ def delete_bookmark(user_id, bookmark_id):
 
     bookmark = Bookmark.objects.filter(id=bookmark_id).first()
     if bookmark_id.owner_user.id != user_id:
-        return False, bookmark
+        return bookmark
     bookmark.status = False
     bookmark.save()
 
-    return True, bookmark.serialize()
+    return bookmark.serialize()
 
 
 def add_owner_org(user_id, dataset_data):
@@ -255,11 +240,11 @@ def add_owner_org(user_id, dataset_data):
     org = get_org(dataset_data.gete("org_id"))
 
     if dataset.owner_user.id != user_id:
-        return False, dataset
+        return dataset
     dataset.owner_org = org
     dataset.save()
 
-    return True, dataset  # TODO: remove owner org or just update
+    return dataset  # TODO: remove owner org or just update
 
 
 def publish_dataset(user_id, dataset_id):
@@ -268,12 +253,12 @@ def publish_dataset(user_id, dataset_id):
     """
     dataset = get_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
-        return False, dataset
+        return dataset
 
     dataset.is_published = True
     dataset.save()
 
-    return True, dataset
+    return dataset
 
 
 def unpusblish_dataset(user_id, dataset_id):
@@ -282,12 +267,12 @@ def unpusblish_dataset(user_id, dataset_id):
     """
     dataset = get_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
-        return False, dataset
+        return dataset
 
     dataset.is_published = False
     dataset.save()
 
-    return True, dataset
+    return dataset
 
 
 def archive_dataset(user_id, dataset_id):
@@ -296,12 +281,12 @@ def archive_dataset(user_id, dataset_id):
     """
     dataset = get_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
-        return False, dataset
+        return dataset
 
     dataset.is_archived = True
     dataset.save()
 
-    return True, dataset
+    return dataset
 
 
 def unarchive_dataset(user_id, dataset_id):
@@ -310,12 +295,12 @@ def unarchive_dataset(user_id, dataset_id):
     """
     dataset = get_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
-        return False, dataset
+        return dataset
 
     dataset.is_archived = False
     dataset.save()
 
-    return True, dataset
+    return dataset
 
 
 def approve_dataset(user_id, dataset_id):
@@ -324,12 +309,12 @@ def approve_dataset(user_id, dataset_id):
     """
     dataset = get_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
-        return False, dataset
+        return dataset
 
     dataset.is_approved = True
     dataset.save()
 
-    return True, dataset
+    return dataset
 
 
 def disapprove_dataset(user_id, dataset_id):
@@ -338,12 +323,12 @@ def disapprove_dataset(user_id, dataset_id):
     """
     dataset = get_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
-        return False, dataset
+        return dataset
 
     dataset.is_approved = False
     dataset.save()
 
-    return True, dataset
+    return dataset
 
 
 # TODO: if depends on condition, use tuple returns else return serialized()

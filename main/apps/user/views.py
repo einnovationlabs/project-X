@@ -99,11 +99,10 @@ def update_user(request, user_id):
 
 
 @csrf_exempt
-def get_user(request):
+def get_user(request, user_id):
     """
     Endpoint to get user by id
     """
-    user_id = request.GET.get("user_id")
     if not user_id:
         return error_response("Invalid user ID.")
 

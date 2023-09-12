@@ -2,33 +2,31 @@ from django.db import models
 
 
 class Dataset(models.Model):
-    """
-    Dataset model
-    """
+    single_fields = [
+        "is_verified", "has_user_policy", "is_government", "is_public", "is_published", "is_archived",
+        "is_approved", "is_deleted", "title", "description", "status", "addt_info"
+    ]
 
     is_verified = models.BooleanField(default=False)
     has_user_policy = models.BooleanField(default=False)
     is_government = models.BooleanField(default=False)
     is_public = models.BooleanField(default=True)
-
     is_published = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
 
     title = models.CharField(max_length=100, default="")
-
     description = models.CharField(max_length=1000, default="")
 
     status = models.TextField(default=None)  # make it choices
-
     addt_info = models.TextField(default=None)
 
     owner_organization = models.ForeignKey(
         "organization.Organization", on_delete=models.RESTRICT, default=None, null=True
     )
-    owner_user = models.ForeignKey("user.User", on_delete=models.RESTRICT, default=None)
-
+    owner_user = models.ForeignKey(
+        "user.User", on_delete=models.RESTRICT, default=None)
     metadata = models.ForeignKey(
         "Dataset_Metadata", on_delete=models.RESTRICT, unique=True, blank=False
     )
@@ -37,9 +35,6 @@ class Dataset(models.Model):
     files = models.ManyToManyField("File", through="Dataset_File")
 
     def serialize(self):
-        """
-        Serializes a Dataset object
-        """
         return {
             "id": self.id,
             "is_verified": self.is_verified,
@@ -55,9 +50,7 @@ class Dataset(models.Model):
             "is_deleted": self.is_deleted,
             "addt_info": self.addt_info,
             "owner_user": self.owner_user.serialize() if self.owner_user else None,
-            "owner_organization": self.owner_organization.serialize()
-            if self.owner_organization
-            else None,
+            "owner_organization": self.owner_organization.serialize() if self.owner_organization else None,
             "metadata": self.metadata.serialize(),
             "tags": [tag.serialize() for tag in self.tags.all()],
             "files": [file.serialize() for file in self.files.all()],
@@ -72,10 +65,6 @@ class Dataset(models.Model):
 
 
 class File(models.Model):
-    """
-    File model
-    """
-
     title = models.CharField(max_length=50)
     url = models.CharField(max_length=50, default=None, blank=False)
     status = models.BooleanField(default=True)
@@ -101,13 +90,8 @@ class Dataset_File(models.Model):
 
 
 class Comment(models.Model):
-    """
-    Dataset Comment model
-    """
-
     body = models.TextField()
     date_created = models.DateField(auto_now_add=True)
-
     status = models.BooleanField(default=True)
 
     dataset = models.ForeignKey(
@@ -135,16 +119,14 @@ class Comment(models.Model):
 
 
 class Dataset_Metadata(models.Model):
-    """
-    Metadata model
-    """
+    single_fields = [
+        "file", "blurb", "source_link", "resource_type", "publisher",  "maintainer", "license_link",
+        "date_created", "date_modified"]
 
-    metadata_file = models.CharField(
-        max_length=50, null=True
-    )  # relation with file model
-    metadata_blurb = models.CharField(max_length=1000, blank=True, null=True)
-    metadata_source_link = models.URLField()
-    metadata_resource_type = models.CharField(max_length=50)
+    file = models.CharField(max_length=50, null=True)
+    blurb = models.CharField(max_length=1000, blank=True, null=True)
+    source_link = models.URLField()
+    resource_type = models.CharField(max_length=50)
     publisher = models.CharField(max_length=100)  # user or org or Admin ?
     maintainer = models.CharField(max_length=100)  # user or org or Admin ?
     license_link = models.URLField()
@@ -178,10 +160,6 @@ class Dataset_Tag(models.Model):
 
 
 class Like(models.Model):
-    """
-    Like model
-    """
-
     status = models.BooleanField(default=True)
     user = models.ForeignKey(
         "user.User", on_delete=models.RESTRICT, default=None, related_name="user_likes"
@@ -203,10 +181,6 @@ class Like(models.Model):
 
 
 class Bookmark(models.Model):
-    """
-    Bookmark model
-    """
-
     status = models.BooleanField(default=True)
     user = models.ForeignKey(
         "user.User",

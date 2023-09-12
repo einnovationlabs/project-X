@@ -9,7 +9,7 @@ def create_org(org_data, admin_id):
     success, admin = get_user(admin_id)
 
     if not success:
-        return False, None
+        return None
 
     org = Organization(
         organization_name=org_data.get("organization_name"),
@@ -22,7 +22,7 @@ def create_org(org_data, admin_id):
     )
 
     if not success:
-        return False, org
+        return org
 
     org.save()
     org.admins.add(admin)
@@ -42,7 +42,7 @@ def update_org(org_id, org_data):
     success, org = get_org(id=org_id)
 
     if not success:
-        return False, org
+        return org
 
     org.organization_name = org_data.get("organization_name")
     org.location = org_data.get("location")
@@ -64,7 +64,7 @@ def delete_org(org_id):
     success, org = get_org(id=org_id)
 
     if not success:
-        return False, org
+        return org
 
     org.is_deleted = True
     org.save()
@@ -79,7 +79,7 @@ def get_org(org_id):
     org = Organization.objects.get(id=org_id)
 
     if not org:
-        return False, org
+        return org
 
     return True, org
 
@@ -99,22 +99,22 @@ def add_org_member(admin_id, org_data):  # TODO: add member or members
     member_id = org_data.get("member_id")
     success, member = get_user(member_id)
     if not success:
-        return False, member
+        return member
 
     success, org = get_org(org_data.get("org_id"))
 
     if not success:
-        return False, member
+        return member
 
     success, admin = get_user(admin_id)
 
     if not success:
-        return False, member
+        return member
 
     admin = org.admins.filter(admin).first()
 
     if not admin:
-        return False, member
+        return member
 
     org.members.add(member)
     # TODO: reconsider roles field for user
@@ -132,16 +132,16 @@ def remove_org_member(admin_id, org_data):
     success, member = get_user(member_id)
 
     if not success:
-        return False, member
+        return member
 
     success, org = get_org(org_data.get("org_id"))
     if not success:
-        return False, member
+        return member
 
     admin = org.admins.filter(admin=get_user(admin_id)).first()
 
     if not admin:
-        return False, member
+        return member
 
     org.members.remove(member)
     org.save()

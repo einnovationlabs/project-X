@@ -25,6 +25,9 @@ class User(models.Model):
     files = models.ManyToManyField("dataset.File", through="User_File")
 
     def serialize(self):
+        if not self:
+            return None
+
         return {
             "id": self.id,
             "phone_number": self.phone_number,

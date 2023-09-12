@@ -6,7 +6,6 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 
-##### DATASETS ENDPOINTS #####
 @csrf_exempt
 def create_dataset(request, user_id):
     """
@@ -15,7 +14,7 @@ def create_dataset(request, user_id):
     data = json.loads(request.body)
     dataset = crud.create_dataset(data, user_id)
 
-    return JsonResponse(dataset[1])
+    return JsonResponse(dataset)
 
 
 @csrf_exempt
