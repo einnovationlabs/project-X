@@ -13,53 +13,56 @@ from apps.dataset.models import Like
 from apps.dataset.models import Bookmark
 from apps.organization.crud import get_org
 
+from apps.users.errors import UserNotFound
 
-def create_dataset(dataset_data, user_id):
-    """
-    Creates dataset given dataset_data
-    """
-    exists, owner_user = get_user(user_id)
+def _create_dataset_files(files):
+    dataset_files = []
+    for dataset_title, url in files:
+        file = File(title = dataset_title, file_url = url, owner_user = owner_user)
+        file.save()
+        dataset_files.append(file)
 
-    if not exists:
-        return False, None
+def _create_dataset_tags(tags):
+    dataset_tags = []
+    for tag_name in dataset_tags:
+        tag = Tag(name = tag_name)
+        tag.save()
+        tags.append(tag)
+
+def create_dataset(data, user_id):
+    """
+    Creates dataset given data
+    """
+    owner = get_user(user_id)
+    if not owner:
+        raise 
 
     metadata = Dataset_Metadata(
-            metadata_file = dataset_data.get("metadata").get("metadata_file"),
-            metadata_blurb = dataset_data.get("metadata").get("metadata_blurb"),
-            metadata_source_link = dataset_data.get("metadata").get("metadata_source_link"),
-            metadata_resource_type = dataset_data.get("metadata").get("metadata_resource_type"),
-            publisher = dataset_data.get("metadata").get("publisher"),
-            maintainer = dataset_data.get("metadata").get("maintainer"),
-            license_link = dataset_data.get("metadata").get("license_link")
+            metadata_file = data.get("metadata").get("metadata_file"),
+            metadata_blurb = data.get("metadata").get("metadata_blurb"),
+            metadata_source_link = data.get("metadata").get("metadata_source_link"),
+            metadata_resource_type = data.get("metadata").get("metadata_resource_type"),
+            publisher = data.get("metadata").get("publisher"),
+            maintainer = data.get("metadata").get("maintainer"),
+            license_link = data.get("metadata").get("license_link")
     )
     metadata.save()
 
     dataset = Dataset(
-            is_verified = dataset_data.get('is_verified'), 
-            has_user_policy = dataset_data.get('has_user_policy'), 
-            is_government = dataset_data.get('is_government'),
-            is_public = dataset_data.get('is_public'),
-            title=dataset_data.get('title'),
-            description=dataset_data.get('description'),
-            status = dataset_data.get('status'),
-            addt_info = dataset_data.get('addt_info'),
-            owner_user = owner_user,
+            is_verified = data.get('is_verified'), 
+            has_user_policy = data.get('has_user_policy'), 
+            is_government = data.get('is_government'),
+            is_public = data.get('is_public'),
+            title=data.get('title'),
+            description=data.get('description'),
+            status = data.get('status'),
+            addt_info = data.get('addt_info'),
+            owner_user = owner,
             dataset_metadata = metadata
-
             )
     
-    dataset.save()
-    files = []
-    for dataset_title, url in dataset_data.get("dataset_files"):
-        file = File(title = dataset_title, file_url = url, dataset = dataset, owner_user = owner_user)
-        file.save()
-        files.append(file.serialize())
-
-    tags = []
-    for tag_name in dataset_data.get("tags"):
-        tag = Tag(name = tag_name, dataset = dataset)
-        tag.save()
-        tags.append(tag.serialize())
+    dataset.files = _create_dataset_files(data.get("files"))
+    dataset.tags = _create_dataset_tags(data.get("tags"))
         
     dataset.save()
 
@@ -68,7 +71,7 @@ def create_dataset(dataset_data, user_id):
         "dataset_tags" : tags,
         "dataset_files" : files
     }
-    return True, res
+    return res
 
 
 def update_dataset(dataset_id, dataset_data):
@@ -78,7 +81,6 @@ def update_dataset(dataset_id, dataset_data):
     dataset = Dataset.objects.get(id = dataset_id)
 
     metadata = dataset.dataset_metadata
-
     metadata.metadata_file = dataset_data.get("metadata").get("metadata_file")
     metadata.metadata_title = dataset_data.get("metadata").get("metadata_title")
     metadata.metadata_blurb = dataset_data.get("metadata").get("metadata_blurb")
@@ -89,7 +91,6 @@ def update_dataset(dataset_id, dataset_data):
     metadata.license_link = dataset_data.get("metadata").get("license_link")
 
     metadata.save()
-
 
     dataset.is_verified = dataset_data.get('is_verified')
     dataset.has_user_policy = dataset_data.get('has_user_policy')
@@ -117,45 +118,13 @@ def get_dataset(dataset_id):
     """
     Retrieves and Returns dataset given dataset_id
     """
-    dataset = Dataset.objects.get(id = dataset_id)
-    files =  []
-    for file in File.objects.filter(dataset = dataset).all():
-        files.append(file.serialize())
-    tags = []
-    for tag in Tag.objects.filter(dataset = dataset).all():
-        tags.append(tag.serialize())
-
-    
-    comments = []
-    for comment in Comment.objects.filter(dataset = dataset).all():
-        comments.append(comment.serialize())
-
-    likes = []
-    for like in Like.objects.filter(dataset = dataset).all():
-        likes.append(like.serialize())
-        
-    return {
-        "data" : dataset.serialize(),
-        "comments" : comments,
-        "tags" : tags,
-        "files" : files,
-        "likes" : likes,
-    }
-    
+    return {"dataset": Dataset.objects.get(id = dataset_id)}
 
 def get_all_datasets():
     """
     Retrieves and Returns all datasets
     """
-    datasets = Dataset.objects.filter(is_deleted=False).all()
-    res = []
-    
-    print("***********************************************************************************")
-
-    for dataset in datasets:
-        res.append(dataset.serialize())
-
-    return {"datasets" : res}
+    return {"datasets" : [dataset.serialize() for dataset in Dataset.objects.filter(is_deleted=False).all()]}
 
 
 def create_tag():

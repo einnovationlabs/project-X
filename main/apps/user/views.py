@@ -47,7 +47,6 @@ def users_list(request):
     Get all users
     """
     users = crud.get_users()
-    
     return success_response(users)
 
 @csrf_exempt
@@ -56,7 +55,6 @@ def users_list_admin(request):
     Get all users
     """
     users = crud.get_users()
-    
     return success_response(users)
 
 @csrf_exempt
@@ -97,12 +95,15 @@ def update_user(request, user_id):
 
 
 @csrf_exempt
-def get_user(request, user_id):
+def get_user(request):
     """
     Endpoint to get user by id
     """
-    user = crud.get_user(user_id = user_id)
+    user_id = request.GET.get("user_id")
+    if not user_id:
+        return error_response("Invalid user ID.")
 
+    user = crud.get_user(user_id = user_id)
     if not user:
         return error_response("Failed to get user")
     
