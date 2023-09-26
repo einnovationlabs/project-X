@@ -57,39 +57,6 @@ def create_dataset(data, user_id):
         return error_response("User does not exist!")
 
 
-def update_dataset_metadata(metadata, data):
-    metadata.file = data.get("metadata").get("file")
-    metadata.metadata_title = data.get("metadata").get("metadata_title")
-    metadata.metadata_blurb = data.get("metadata").get("metadata_blurb")
-    metadata.metadata_source_link = data.get("metadata").get("metadata_source_link")
-    metadata.metadata_resource_type = data.get("metadata").get("metadata_resource_type")
-    metadata.publisher = data.get("metadata").get("publisher")
-    metadata.maintainer = data.get("metadata").get("maintainer")
-    metadata.license_link = data.get("metadata").get("license_link")
-
-    metadata.save()
-
-
-def update_dataset(dataset_id, data):
-    dataset = Dataset.objects.get(id=dataset_id)
-    if not dataset:
-        return None
-
-    for field in Dataset.single_fields:
-        setattr(dataset, field, data.get(field))
-
-    dataset.save()
-    return {"dataset": dataset}
-
-
-def delete_dataset(dataset_id):
-    dataset = Dataset.objects.get(id=dataset_id)
-    dataset.is_deleted = True
-    dataset.save()
-    dataset = Dataset.objects.get(id=dataset_id)
-    return {"dataset": dataset}
-
-
 def get_dataset(dataset_id):
     """
     Retrieves and Returns dataset given dataset_id
@@ -107,6 +74,40 @@ def get_all_datasets():
             for dataset in Dataset.objects.filter(is_deleted=False).all()
         ]
     }
+
+def delete_dataset(dataset_id):
+    dataset = Dataset.objects.get(id=dataset_id)
+    dataset.is_deleted = True
+    dataset.save()
+    dataset = Dataset.objects.get(id=dataset_id)
+    return {"dataset": dataset}
+
+
+
+def update_dataset_metadata(dataset_id, data):
+    dataset = Dataset.objects.get(id=dataset_id)
+    if not dataset:
+        return None
+    
+    metadata = dataset.metadata
+    for field in Dataset_Metadata.single_fields:
+        setattr(metadata, field, data.get(field))
+    
+    metadata.save()
+    dataset.save()
+    return {"dataset": dataset}
+
+
+def update_dataset(dataset_id, data):
+    dataset = Dataset.objects.get(id=dataset_id)
+    if not dataset:
+        return None
+
+    for field in Dataset.single_fields:
+        setattr(dataset, field, data.get(field))
+
+    dataset.save()
+    return {"dataset": dataset}
 
 
 def delete_tag(tag_id):
