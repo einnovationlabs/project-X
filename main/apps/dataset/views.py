@@ -82,6 +82,7 @@ def search_dataset_by_category(request):
     """
     Endpoint to search datasets by category
     """
+    ...
 
 
 @csrf_exempt

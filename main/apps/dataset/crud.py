@@ -1,17 +1,16 @@
+""" CRUD for datasets. """
 from apps.dataset.models import (Bookmark, Comment, Dataset, Dataset_Metadata,
                                  File, Like, Tag)
 from apps.organization.crud import get_org
 from apps.user.crud import get_user
+from apps.user.models import User
+from utils import error_response
 
 
 def _create_dataset_files(dataset_id, files):
-    print(files)
-    if not files:
-        return []
-
     res = []
     for title, url in files:
-        file = File(title=title, file_url=url, owner_user=owner_user)
+        file = File(title=title, file_url=url)
         file.save()
         res.append(file)
 
@@ -23,7 +22,7 @@ def _create_dataset_tags(dataset_id, tags):
         return []
 
     res = []
-    for name in dataset_tags:
+    for name in tags:
         tag = Tag(name=name)
         tag.save()
         res.append(tag)
@@ -32,45 +31,41 @@ def _create_dataset_tags(dataset_id, tags):
 
 
 def create_dataset(data, user_id):
-    owner = get_user(user_id)
-    if not owner:
-        return
+    """
+    Creates dataset using `data` and sets user with id `user_id` as the author.
+    """
+    try:
+        owner = get_user(user_id)
 
-    dataset = Dataset()
-    for field in Dataset.single_fields:
-        setattr(dataset, field, data.get(field))
+        dataset = Dataset()
+        for field in Dataset.single_fields:
+            setattr(dataset, field, data.get(field))
 
-    dataset.owner_user = owner
-    metadata = Dataset_Metadata(**data.get("metadata"))
-    metadata.save()
-    dataset.metadata = metadata
-    dataset.save()
+        dataset.owner_user = owner
+        metadata = Dataset_Metadata(**data.get("metadata"))
+        metadata.save()
+        dataset.metadata = metadata
+        dataset.save()
 
-    _create_dataset_files(dataset.id, data.get("files"))
-    _create_dataset_tags(dataset.id, data.get("tags"))
+        if data.get("files"):
+            _create_dataset_files(dataset.id, data.get("files"))
+        if data.get("tags"):
+            _create_dataset_tags(dataset.id, data.get("tags"))
 
-    return {
-        "dataset": dataset.serialize(),
-        "dataset_tags": dataset.tags,
-        "dataset_files": dataset.files,
-    }
+        return {"dataset": dataset.serialize()}
+    except User.DoesNotExist:
+        return error_response("User does not exist!")
 
 
 def update_dataset_metadata(metadata, data):
-    metadata.file = dataset_data.get("metadata").get("file")
-    metadata.metadata_title = dataset_data.get(
-        "metadata").get("metadata_title")
-    metadata.metadata_blurb = dataset_data.get(
-        "metadata").get("metadata_blurb")
-    metadata.metadata_source_link = dataset_data.get("metadata").get(
-        "metadata_source_link"
-    )
-    metadata.metadata_resource_type = dataset_data.get("metadata").get(
-        "metadata_resource_type"
-    )
-    metadata.publisher = dataset_data.get("metadata").get("publisher")
-    metadata.maintainer = dataset_data.get("metadata").get("maintainer")
-    metadata.license_link = dataset_data.get("metadata").get("license_link")
+    metadata.file = data.get("metadata").get("file")
+    metadata.metadata_title = data.get("metadata").get("metadata_title")
+    metadata.metadata_blurb = data.get("metadata").get("metadata_blurb")
+    metadata.metadata_source_link = data.get("metadata").get("metadata_source_link")
+    metadata.metadata_resource_type = data.get("metadata").get("metadata_resource_type")
+    metadata.publisher = data.get("metadata").get("publisher")
+    metadata.maintainer = data.get("metadata").get("maintainer")
+    metadata.license_link = data.get("metadata").get("license_link")
 
     metadata.save()
 
@@ -114,11 +109,6 @@ def get_all_datasets():
     }
 
 
-def create_tag():
-    """ """
-    tag = Tag(name=tag_name, dataset=dataset)
-
-
 def delete_tag(tag_id):
     """ """
 
@@ -150,8 +140,7 @@ def create_comment(user_id, comment_data):
     """
     owner = get_user(user_id)
     dataset = get_dataset(comment_data.get("dataset_id"))
-    comment = Comment(dataset=dataset, owner_user=owner,
-                      body=comment_data.get("body"))
+    comment = Comment(dataset=dataset, owner_user=owner, body=comment_data.get("body"))
     comment.save()
 
     return comment.serialize()
@@ -175,8 +164,7 @@ def create_like(user_id, like_data):
     """
     dataset = dataset = get_dataset(like_data.get("dataset_id"))
     user = get_user(user_id)
-    like = Like.objects.filter(
-        owner_user=user, dataset=dataset, status=True).first()
+    like = Like.objects.filter(owner_user=user, dataset=dataset, status=True).first()
 
     if like:
         return like
