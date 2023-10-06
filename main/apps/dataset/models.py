@@ -39,8 +39,8 @@ class Dataset(models.Model):
     )
 
     # Many-to-Many Relationships
-    tags = models.ManyToManyField("Tag", through="Dataset_Tag")
-    files = models.ManyToManyField("File", through="Dataset_File")
+    tags = models.ManyToManyField("DatasetTag", through="Dataset_DatasetTag")
+    files = models.ManyToManyField("DatasetFile", through="Dataset_DatasetFile")
 
     def serialize(self):
         return {
@@ -101,7 +101,7 @@ class DatasetMetadata(models.Model):
         }
 
 
-class File(models.Model):
+class DatasetFile(models.Model):
     title = models.CharField(max_length=50)
     url = models.CharField(max_length=50, default=None, blank=False)
     status = models.BooleanField(default=True)
@@ -115,8 +115,8 @@ class File(models.Model):
         }
 
 
-class Dataset_File(models.Model):
-    files = models.ForeignKey("File", on_delete=models.RESTRICT)
+class Dataset_DatasetFile(models.Model):
+    files = models.ForeignKey("DatasetFile", on_delete=models.RESTRICT)
     datasets = models.ForeignKey("Dataset", on_delete=models.RESTRICT)
 
 
@@ -154,9 +154,9 @@ class DatasetComment(models.Model):
         }
 
 
-class Tag(models.Model):
+class DatasetTag(models.Model):
     """
-    Tag model
+    DatasetTag model
     """
 
     name = models.CharField(max_length=50, unique=True)
@@ -166,12 +166,12 @@ class Tag(models.Model):
         return {"id": self.id, "name": self.name}
 
 
-class Dataset_Tag(models.Model):
-    tags = models.ForeignKey("Tag", on_delete=models.RESTRICT)
+class Dataset_DatasetTag(models.Model):
+    tags = models.ForeignKey("DatasetTag", on_delete=models.RESTRICT)
     datasets = models.ForeignKey("Dataset", on_delete=models.RESTRICT)
 
 
-class Like(models.Model):
+class DatasetLike(models.Model):
     status = models.BooleanField(default=True)
     user = models.ForeignKey(
         "user.User",
@@ -198,7 +198,7 @@ class Like(models.Model):
         }
 
 
-class Bookmark(models.Model):
+class DatasetBookmark(models.Model):
     status = models.BooleanField(default=True)
     user = models.ForeignKey(
         "user.User",

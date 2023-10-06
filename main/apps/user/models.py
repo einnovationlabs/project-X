@@ -21,8 +21,8 @@ class User(models.Model):
     is_deleted = models.BooleanField(default=False)
 
     roles = models.ManyToManyField("Role", through="User_Role")
-    tags = models.ManyToManyField("dataset.Tag", through="User_Tag")
-    files = models.ManyToManyField("dataset.File", through="User_File")
+    tags = models.ManyToManyField("dataset.DatasetTag", through="User_Tag")
+    files = models.ManyToManyField("dataset.DatasetFile", through="User_File")
 
     def serialize(self):
         return {
@@ -40,7 +40,9 @@ class User(models.Model):
                 bookmark.serialize() for bookmark in self.user_bookmarks.all()
             ],
             "likes": [like.serialize() for like in self.user_likes.all()],
-            "comments": [comment.serialize() for comment in self.user_comments.all()],
+            "comments": [
+                comment.serialize() for comment in self.user_comments.all()
+            ],
             "roles": [role.serialize() for role in self.roles.all()],
             "tags": [tag.serialize() for tag in self.tags.all()],
             "files": [file.serialize() for file in self.files.all()],
@@ -64,10 +66,10 @@ class User_Role(models.Model):
 
 
 class User_Tag(models.Model):
-    tags = models.ForeignKey("dataset.Tag", on_delete=models.RESTRICT)
+    tags = models.ForeignKey("dataset.DatasetTag", on_delete=models.RESTRICT)
     users = models.ForeignKey("User", on_delete=models.RESTRICT)
 
 
 class User_File(models.Model):
-    files = models.ForeignKey("dataset.File", on_delete=models.RESTRICT)
+    files = models.ForeignKey("dataset.DatasetFile", on_delete=models.RESTRICT)
     users = models.ForeignKey("User", on_delete=models.RESTRICT)
