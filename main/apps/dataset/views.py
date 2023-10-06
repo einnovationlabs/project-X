@@ -117,18 +117,6 @@ def filter_dataset_by_date_range(request):
     """
 
 
-# Comment endpoints
-@csrf_exempt
-def update_comment(request, dataset_id, user_id):
-    """
-    Endpoint to update comment
-    """
-    data = json.loads(request.body)
-    comment = dataset_crud.update_comment(dataset_id, user_id, data)
-
-    return JsonResponse(comment)
-
-
 @csrf_exempt
 def create_comment(request, dataset_id, user_id):
     """
@@ -136,6 +124,17 @@ def create_comment(request, dataset_id, user_id):
     """
     data = json.loads(request.body)
     comment = dataset_crud.create_comment(dataset_id, user_id, data)
+
+    return JsonResponse(comment)
+
+
+@csrf_exempt
+def update_comment(request, comment_id):
+    """
+    Endpoint to update comment
+    """
+    data = json.loads(request.body)
+    comment = dataset_crud.update_comment(comment_id, data)
 
     return JsonResponse(comment)
 

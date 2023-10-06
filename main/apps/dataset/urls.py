@@ -44,6 +44,11 @@ urlpatterns = [
         name="create_comment",
     ),
     path(
+        "datasets.comments.update/<int:comment_id>",
+        views.update_comment,
+        name="update_comment",
+    ),
+    path(
         "datasets.comments.delete", views.delete_comment, name="delete_comment"
     ),
     path(
