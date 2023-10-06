@@ -36,6 +36,16 @@ def update_dataset(request, dataset_id):
 
     return JsonResponse(dataset.serialize())
 
+@csrf_exempt
+def update_dataset_metadata(request, dataset_id):
+    """
+    Endpoint to update dataset by id
+    """
+    data = json.loads(request.body)
+    dataset = crud.update_dataset_metadata(dataset_id, data)
+
+    return JsonResponse(dataset.serialize())
+
 
 @csrf_exempt
 def get_dataset(request, dataset_id):
@@ -58,23 +68,25 @@ def get_all_datasets(request):
     return render(request, "pages/data/catalog.html", all_datasets)
 
 
-@csrf_exempt
-def delete_file(request, dataset_id):
-    """
-    Endpoint to delete file
-    """
-    file_id = json.loads(request.body).get("file_id")
-    return JsonResponse(crud.delete_file(user_id, file_id))
-
 
 @csrf_exempt
-def create_file(request, dataset_id):
+def add_dataset_file(request, user_id, dataset_id):
     """
     Endpoint to delete file
     """
     file_data = json.loads(request.body)
-    return JsonResponse(crud.create_file(user_id, file_data))
+    return JsonResponse(crud.create_file(user_id, dataset_id, file_data))
 
+
+@csrf_exempt
+def delete_dataset_file(request, dataset_id,):
+    """
+    Endpoint to delete file
+    """
+    body = json.loads(request.body)
+    file_id = body.get("file_id")
+    # reason = body.get("file_id")
+    return JsonResponse(crud.delete_dataset_file(user_id, file_id))
 
 # Search and Filtering Endpoints
 @csrf_exempt

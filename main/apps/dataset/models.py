@@ -16,7 +16,6 @@ class Dataset(models.Model):
         "status",
         "addt_info",
     ]
-
     is_verified = models.BooleanField(default=False)
     has_user_policy = models.BooleanField(default=False)
     is_government = models.BooleanField(default=False)

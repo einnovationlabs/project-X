@@ -1,4 +1,3 @@
-""" CRUD for datasets. """
 from apps.dataset.models import (Bookmark, Comment, Dataset, Dataset_Metadata,
                                  File, Like, Tag)
 from apps.organization.crud import get_org
@@ -7,55 +6,48 @@ from apps.user.models import User
 from utils import error_response
 
 
-def _create_dataset_files(dataset_id, files):
-    res = []
-    for title, url in files:
-        file = File(title=title, file_url=url)
-        file.save()
-        res.append(file)
+def create_dataset_file(user_id, dataset_id, file_data):
+    dataset = Dataset.objects.get(id=dataset_id)
+    owner = User.objects.get(id=user_id)
+    
+    file = File(
+        title=file_data.get("title"), file_url=file_data.get("url"), owner_user=owner
+    )
+    file.save()
+    
 
-    return res
-
-
-def _create_dataset_tags(dataset_id, tags):
-    if not tags:
-        return []
-
-    res = []
-    for name in tags:
-        tag = Tag(name=name)
-        tag.save()
-        res.append(tag)
-
-    return res
+def create_dataset_tags(user_id, dataset_id, tag):
+    """Create a `tag` for dataset `dataset_id` with user `user_id` as the author. """
+    tag = Tag(name=name, dataset_id=dataset_id)
+    tag.save()
 
 
 def create_dataset(data, user_id):
     """
     Creates dataset using `data` and sets user with id `user_id` as the author.
     """
-    try:
-        owner = get_user(user_id)
+    owner = get_user(user_id)
 
-        dataset = Dataset()
-        for field in Dataset.single_fields:
-            setattr(dataset, field, data.get(field))
+    dataset = Dataset()
+    for field in Dataset.single_fields:
+        setattr(dataset, field, data.get(field))
 
-        dataset.owner_user = owner
-        metadata = Dataset_Metadata(**data.get("metadata"))
-        metadata.save()
-        dataset.metadata = metadata
-        dataset.save()
+    dataset.owner_user = owner
+    metadata = Dataset_Metadata(**data.get("metadata"))
+    metadata.save()
+    dataset.metadata = metadata
+    dataset.save()
 
-        if data.get("files"):
-            _create_dataset_files(dataset.id, data.get("files"))
-        if data.get("tags"):
-            _create_dataset_tags(dataset.id, data.get("tags"))
+    if files := data.get("files"):
+        for file in files:
+            create_dataset_file(user_id, dataset.id, file)
+    
+    if tags := data.get("tags"):
+        for tag in tags:
+            create_dataset_tags(user_id, dataset.id, tag)
 
-        return {"dataset": dataset.serialize()}
-    except User.DoesNotExist:
-        return error_response("User does not exist!")
-
+    return {"dataset": dataset.serialize()}
+    
 
 def get_dataset(dataset_id):
     """
@@ -77,6 +69,9 @@ def get_all_datasets():
 
 def delete_dataset(dataset_id):
     dataset = Dataset.objects.get(id=dataset_id)
+    if not dataset:
+        return None
+    
     dataset.is_deleted = True
     dataset.save()
     dataset = Dataset.objects.get(id=dataset_id)
@@ -86,8 +81,7 @@ def delete_dataset(dataset_id):
 
 def update_dataset_metadata(dataset_id, data):
     dataset = Dataset.objects.get(id=dataset_id)
-    if not dataset:
-        return None
+    if not dataset: return None
     
     metadata = dataset.metadata
     for field in Dataset_Metadata.single_fields:
@@ -112,18 +106,7 @@ def update_dataset(dataset_id, data):
 
 def delete_tag(tag_id):
     """ """
-
-
-def create_file(user_id, file_data):
-    """
-    Creates and Returns file by user
-    """
-    owner = get_user(user_id)
-    file = File(
-        title=file_data.get("title"), file_url=file_data.get("url"), owner_user=owner
-    )
-    file.save()
-    return file.serialize()
+    ...
 
 
 def delete_file(user_id, file_id):
