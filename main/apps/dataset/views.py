@@ -36,6 +36,7 @@ def update_dataset(request, dataset_id):
 
     return JsonResponse(dataset.serialize())
 
+
 @csrf_exempt
 def update_dataset_metadata(request, dataset_id):
     """
@@ -68,7 +69,6 @@ def get_all_datasets(request):
     return render(request, "pages/data/catalog.html", all_datasets)
 
 
-
 @csrf_exempt
 def add_dataset_file(request, user_id, dataset_id):
     """
@@ -79,7 +79,10 @@ def add_dataset_file(request, user_id, dataset_id):
 
 
 @csrf_exempt
-def delete_dataset_file(request, dataset_id,):
+def delete_dataset_file(
+    request,
+    dataset_id,
+):
     """
     Endpoint to delete file
     """
@@ -87,6 +90,7 @@ def delete_dataset_file(request, dataset_id,):
     file_id = body.get("file_id")
     # reason = body.get("file_id")
     return JsonResponse(crud.delete_dataset_file(user_id, file_id))
+
 
 # Search and Filtering Endpoints
 @csrf_exempt
@@ -112,18 +116,15 @@ def filter_dataset_by_date_range(request):
 
 
 # Comment endpoints
-
-
 @csrf_exempt
-def create_comment(request, user_id):
+def create_comment(request, dataset_id, user_id):
     """
     Endpoint to create comment
     """
     data = json.loads(request.body)
+    comment = crud.create_comment(dataset_id, user_id, data)
 
-    comment = crud.create_comment(user_id, data)
-
-    return JsonResponse(comment.serialize())
+    return JsonResponse(comment)
 
 
 @csrf_exempt
