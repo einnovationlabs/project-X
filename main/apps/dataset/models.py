@@ -69,10 +69,17 @@ class Dataset(models.Model):
             "bookmarks": [
                 bookmark.serialize()
                 for bookmark in self.dataset_bookmarks.all()
+                if bookmark.active
             ],
-            "likes": [like.serialize() for like in self.dataset_likes.all()],
+            "likes": [
+                like.serialize()
+                for like in self.dataset_likes.all()
+                if like.active
+            ],
             "comments": [
-                comment.serialize() for comment in self.dataset_comments.all()
+                comment.serialize()
+                for comment in self.dataset_comments.all()
+                if comment.active
             ],
         }
 
@@ -130,7 +137,7 @@ class DatasetComment(models.Model):
     body = models.TextField()
     date_created = models.DateField(default=datetime.today)
     date_modified = models.DateField(auto_now=True)
-    status = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)
 
     dataset = models.ForeignKey(
         "Dataset",
@@ -172,7 +179,7 @@ class Dataset_DatasetTag(models.Model):
 
 
 class DatasetLike(models.Model):
-    status = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)
     user = models.ForeignKey(
         "user.User",
         on_delete=models.RESTRICT,

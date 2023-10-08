@@ -1,0 +1,6 @@
+class UserDoesNotExist(Exception):
+    ...
+
+
+class DatasetDoesNotExist(Exception):
+    ...

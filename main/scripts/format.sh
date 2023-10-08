@@ -16,7 +16,4 @@ autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in
 black .
 isort --recursive --apply .
 
-# #* Affirm typing, linnting and formatting
-# black . --check
-# isort --recursive --check-only .
-# flake8
+

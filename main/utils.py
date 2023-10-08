@@ -6,4 +6,4 @@ def success_response(data):
 
 
 def error_response(message):
-    return JsonResponse({"message": message})
+    return JsonResponse({"error": message})

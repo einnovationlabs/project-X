@@ -4,6 +4,8 @@ import apps.dataset.crud as dataset_crud
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from utils import error_response
+from errors import UserDoesNotExist, DatasetDoesNotExist
 
 
 @csrf_exempt
@@ -12,40 +14,11 @@ def create_dataset(request, user_id):
     Endpoint to create dataset
     """
     data = json.loads(request.body)
-    dataset = dataset_crud.create_dataset(data, user_id)
-
-    return JsonResponse(dataset)
-
-
-@csrf_exempt
-def delete_dataset(request, dataset_id):
-    """
-    Endpoint to delete dataset by id
-    """
-    dataset = dataset_crud.delete_dataset(dataset_id)
-    return JsonResponse(dataset.serialize())
-
-
-@csrf_exempt
-def update_dataset(request, dataset_id):
-    """
-    Endpoint to update dataset by id
-    """
-    data = json.loads(request.body)
-    dataset = dataset_crud.update_dataset(dataset_id, data)
-
-    return JsonResponse(dataset.serialize())
-
-
-@csrf_exempt
-def update_dataset_metadata(request, dataset_id):
-    """
-    Endpoint to update dataset by id
-    """
-    data = json.loads(request.body)
-    dataset = dataset_crud.update_dataset_metadata(dataset_id, data)
-
-    return JsonResponse(dataset.serialize())
+    try:
+        dataset = dataset_crud.create_dataset(data, user_id)
+        return JsonResponse(dataset)
+    except UserDoesNotExist:
+        return error_response("User does not exist.")
 
 
 @csrf_exempt
@@ -61,11 +34,42 @@ def get_dataset(request, dataset_id):
 
 
 @csrf_exempt
-def get_all_datasets(request):
+def update_dataset(request, dataset_id):
+    """
+    Endpoint to update dataset by id
+    """
+    data = json.loads(request.body)
+    dataset = dataset_crud.update_dataset(dataset_id, data)
+
+    return JsonResponse(dataset.serialize())
+
+
+@csrf_exempt
+def delete_dataset(request, dataset_id):
+    """
+    Endpoint to delete dataset by id
+    """
+    dataset = dataset_crud.delete_dataset(dataset_id)
+    return JsonResponse(dataset.serialize())
+
+
+@csrf_exempt
+def update_dataset_metadata(request, dataset_id):
+    """
+    Endpoint to update dataset by id
+    """
+    data = json.loads(request.body)
+    dataset = dataset_crud.update_dataset_metadata(dataset_id, data)
+
+    return JsonResponse(dataset.serialize())
+
+
+@csrf_exempt
+def read_all_datasets(request):
     """
     Endpoint to get all datasets
     """
-    all_datasets = dataset_crud.get_all_datasets()
+    all_datasets = dataset_crud.read_all_datasets()
     return render(request, "pages/data/catalog.html", all_datasets)
 
 

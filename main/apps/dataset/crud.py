@@ -8,35 +8,19 @@ from apps.dataset.models import (
     DatasetTag,
 )
 from apps.organization.crud import get_org
-from apps.user.crud import get_user
 from apps.user.models import User
 from utils import error_response
 from datetime import datetime
-
-
-def create_dataset_file(user_id, dataset_id, file_data):
-    dataset = Dataset.objects.get(id=dataset_id)
-    owner = User.objects.get(id=user_id)
-
-    file = File(
-        title=file_data.get("title"),
-        file_url=file_data.get("url"),
-        owner_user=owner,
-    )
-    file.save()
-
-
-def create_dataset_tags(user_id, dataset_id, tag):
-    """Create a `tag` for dataset `dataset_id` with user `user_id` as the author."""
-    tag = Tag(name=name, dataset_id=dataset_id)
-    tag.save()
+from errors import UserDoesNotExist, DatasetDoesNotExist
 
 
 def create_dataset(data, user_id):
     """
     Creates dataset using `data` and sets user with id `user_id` as the author.
     """
-    owner = get_user(user_id)
+    owner = User.objects.filter(id=user_id).first()
+    if not owner:
+        raise UserDoesNotExist
 
     dataset = Dataset()
     for field in Dataset.custom_single_fields:
@@ -57,14 +41,17 @@ def create_dataset(data, user_id):
     return {"dataset": dataset.serialize()}
 
 
-def get_dataset(dataset_id):
+def read_dataset(dataset_id):
     """
     Retrieves and Returns dataset given dataset_id
     """
-    return {"dataset": Dataset.objects.get(id=dataset_id)}
+    dataset = Dataset.objects.get(id=dataset_id)
+    if not dataset:
+        raise DatasetDoesNotExist
+    return {"dataset": dataset}
 
 
-def get_all_datasets():
+def read_all_datasets():
     """
     Retrieves and Returns all datasets
     """
@@ -123,7 +110,7 @@ def update_dataset_metadata(dataset_id, data):
         return None
 
     metadata = dataset.metadata
-    for field in Dataset_Metadata.single_fields:
+    for field in DatasetMetadata.single_fields:
         setattr(metadata, field, data.get(field))
 
     metadata.save()
@@ -157,7 +144,7 @@ def update_comment(comment_id, data):
         comment.body = body
         comment.save()
         return {"comment": comment.serialize()}
-    return delete_comment(comment_id)
+    return delete_comment(user_id, comment_id)
 
 
 def delete_comment(user_id, comment_id):
@@ -172,6 +159,24 @@ def delete_comment(user_id, comment_id):
     return comment.serialize()
 
 
+def create_dataset_file(user_id, dataset_id, file_data):
+    dataset = Dataset.objects.get(id=dataset_id)
+    owner = User.objects.get(id=user_id)
+
+    file = DatasetFile(
+        title=file_data.get("title"),
+        file_url=file_data.get("url"),
+        owner_user=owner,
+    )
+    file.save()
+
+
+def create_dataset_tags(user_id, dataset_id, tag):
+    """Create a `tag` for dataset `dataset_id` with user `user_id` as the author."""
+    tag = Tag(name=name, dataset_id=dataset_id)
+    tag.save()
+
+
 def delete_tag(tag_id):
     """ """
     ...
@@ -184,24 +189,6 @@ def delete_file(user_id, file_id):
     file.status = False
     file.save()
     return file.serialize()
-
-
-def create_like(user_id, like_data):
-    """
-    Creates and Returns like by user
-    """
-    dataset = dataset = get_dataset(like_data.get("dataset_id"))
-    user = get_user(user_id)
-    like = Like.objects.filter(
-        owner_user=user, dataset=dataset, status=True
-    ).first()
-
-    if like:
-        return like
-
-    like = Like(user=user, dataset=dataset)
-    like.save()
-    return like
 
 
 def create_like(dataset_id, user_id, data):
@@ -219,15 +206,15 @@ def create_like(dataset_id, user_id, data):
     return {"comment": comment.serialize()}
 
 
-def delete_like(user_id, like_id):
+def delete_like(like_id, user_id):
     """
     Deletes and Returns like by user
     """
-
-    like = Like.objects.filter(id=like_id).first()
+    like = Like.objects.get(id=like_id)
     if like_id.owner_user.id != user_id:
         return like
-    like.status = False
+
+    like.active = False
     like.save()
 
     return like.serialize()
@@ -237,8 +224,8 @@ def create_bookmark(user_id, bookmark_data):
     """
     Creates and Returns bookmark by user
     """
-    dataset = dataset = get_dataset(bookmark_data.get("dataset_id"))
-    user = get_user(user_id)
+    dataset = dataset = read_dataset(bookmark_data.get("dataset_id"))
+    user = User.objects.get(id=user_id)
     bookmark = Bookmark.objects.filter(
         owner_user=user, dataset=dataset, status=True
     ).first()
@@ -246,7 +233,7 @@ def create_bookmark(user_id, bookmark_data):
     if bookmark:
         return bookmark
 
-    bookmark = Bookmark(user=user, dataset=dataset)
+    bookmark = DatasetBookmark(user=user, dataset=dataset)
     bookmark.save()
     return bookmark
 
@@ -256,7 +243,7 @@ def delete_bookmark(user_id, bookmark_id):
     Deletes and Returns bookmark by user
     """
 
-    bookmark = Bookmark.objects.filter(id=bookmark_id).first()
+    bookmark = DatasetBookmark.objects.filter(id=bookmark_id).first()
     if bookmark_id.owner_user.id != user_id:
         return bookmark
     bookmark.status = False
@@ -269,7 +256,7 @@ def add_owner_org(user_id, dataset_data):
     """
     Adds owner org to dataset by user
     """
-    dataset = get_dataset(dataset_data.get("dataset_id"))
+    dataset = read_dataset(dataset_data.get("dataset_id"))
     org = get_org(dataset_data.gete("org_id"))
 
     if dataset.owner_user.id != user_id:
@@ -284,7 +271,7 @@ def publish_dataset(user_id, dataset_id):
     """
     Publishes dataset by user
     """
-    dataset = get_dataset(dataset_id)
+    dataset = read_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
         return dataset
 
@@ -298,7 +285,7 @@ def unpusblish_dataset(user_id, dataset_id):
     """
     Unpublishes dataset by user
     """
-    dataset = get_dataset(dataset_id)
+    dataset = read_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
         return dataset
 
@@ -312,7 +299,7 @@ def archive_dataset(user_id, dataset_id):
     """
     Archives dataset by user
     """
-    dataset = get_dataset(dataset_id)
+    dataset = read_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
         return dataset
 
@@ -326,7 +313,7 @@ def unarchive_dataset(user_id, dataset_id):
     """
     Unarchives dataset by user
     """
-    dataset = get_dataset(dataset_id)
+    dataset = read_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
         return dataset
 
@@ -340,7 +327,7 @@ def approve_dataset(user_id, dataset_id):
     """
     Approves dataset by user
     """
-    dataset = get_dataset(dataset_id)
+    dataset = read_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
         return dataset
 
@@ -354,7 +341,7 @@ def disapprove_dataset(user_id, dataset_id):
     """
     Disapproves dataset by user
     """
-    dataset = get_dataset(dataset_id)
+    dataset = read_dataset(dataset_id)
     if dataset.owner_user.id != user_id:
         return dataset
 

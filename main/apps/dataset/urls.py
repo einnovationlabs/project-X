@@ -8,7 +8,7 @@ urlpatterns = [
         views.create_dataset,
         name="create_dataset",
     ),
-    path("datasets.list/", views.get_all_datasets, name="get_all_datasets"),
+    path("datasets.list/", views.read_all_datasets, name="read_all_datasets"),
     path(
         "datasets.info/<int:dataset_id>", views.get_dataset, name="get_dataset"
     ),
