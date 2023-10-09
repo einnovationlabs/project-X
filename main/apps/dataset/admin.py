@@ -4,22 +4,21 @@ from .models import (
     DatasetBookmark,
     DatasetComment,
     Dataset,
-    Dataset_DatasetFile,
+    RelDatasetDatasetFile,
     DatasetMetadata,
-    Dataset_DatasetTag,
+    RelDatasetDatasetTag,
     DatasetFile,
     DatasetLike,
     DatasetTag,
 )
 
 # Register your models here.
-
 admin.site.register(Dataset)
 admin.site.register(DatasetFile)
-admin.site.register(Dataset_DatasetFile)
+admin.site.register(RelDatasetDatasetFile)
 admin.site.register(DatasetComment)
 admin.site.register(DatasetMetadata)
 admin.site.register(DatasetLike)
 admin.site.register(DatasetBookmark)
-admin.site.register(Dataset_DatasetTag)
+admin.site.register(RelDatasetDatasetTag)
 admin.site.register(DatasetTag)

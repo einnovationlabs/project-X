@@ -18,8 +18,6 @@ def create_user(user_data):
         about=user_data.get("about"),
     )
 
-    user.save()
-
     # become org_contributor on creation
     # become org admin on addition or creation of org
     # become super admin ???
@@ -27,8 +25,8 @@ def create_user(user_data):
 
     user_role.save()
     user.roles.add(user_role)
-
     user.save()
+
     return user
 
 

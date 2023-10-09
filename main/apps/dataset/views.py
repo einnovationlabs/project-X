@@ -26,11 +26,16 @@ def get_dataset(request, dataset_id):
     """
     Endpoint to get dataset by id
     """
-    return render(
-        request,
-        "pages/data/dataset.html",
-        {"dataset": dataset_crud.read_dataset(dataset_id=dataset_id)},
-    )
+    try:
+        # return render(
+        #     request,
+        #     "pages/data/dataset.html",
+        return JsonResponse(
+            {"dataset": dataset_crud.read_dataset(dataset_id=dataset_id)},
+        )
+    # )
+    except DatasetDoesNotExist:
+        return error_response("Dataset does not exists")
 
 
 @csrf_exempt
@@ -85,17 +90,14 @@ def add_dataset_file(request, user_id, dataset_id):
 
 
 @csrf_exempt
-def delete_dataset_file(
-    request,
-    dataset_id,
-):
+def delete_dataset_file(request, file_id, user_id):
     """
     Endpoint to delete file
     """
     body = json.loads(request.body)
-    file_id = body.get("file_id")
-    # reason = body.get("file_id")
-    return JsonResponse(dataset_crud.delete_dataset_file(user_id, file_id))
+    return JsonResponse(
+        dataset_crud.delete_dataset_file(body, file_id, user_id)
+    )
 
 
 # Search and Filtering Endpoints

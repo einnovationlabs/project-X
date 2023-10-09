@@ -117,9 +117,15 @@ def update_dataset_metadata(dataset_id, data):
         return None
 
     metadata = dataset.metadata
-    for field, value in data.items():
+    if file_data := data.get("file"):
+        metadata.file = create_dataset_file(
+            dataset.author.id, dataset_id, file_data
+        )
+
+    for field, value in DatasetMetadata.custom_fields:
         setattr(metadata, field, value)
 
+    metadata.date_modified = datetime().now()
     metadata.save()
     dataset.save()
     return {"dataset": dataset}
@@ -169,16 +175,28 @@ def delete_comment(user_id, comment_id):
     return comment.serialize()
 
 
-def create_dataset_file(user_id, dataset_id, file_data):
+def create_dataset_file(user_id, dataset_id, data):
     dataset = Dataset.objects.get(id=dataset_id)
-    owner = User.objects.get(id=user_id)
+    uploader = User.objects.get(id=user_id)
+    url = data.get("url")  # * from S3
 
     file = DatasetFile(
-        title=file_data.get("title"),
-        file_url=file_data.get("url"),
-        owner_user=owner,
+        title=data.get("title"),
+        url=url,
+        uploader=uploader,
     )
+
     file.save()
+    return file
+
+
+def delete_file(user_id, file_id):
+    file = DatasetFile.objects.filter(id=file_id).first()
+    if file.owner_user.id != user_id:
+        return file.serialize()
+    file.active = False
+    file.save()
+    return file.serialize()
 
 
 def create_dataset_tags(user_id, dataset_id, tag):
@@ -190,15 +208,6 @@ def create_dataset_tags(user_id, dataset_id, tag):
 def delete_tag(tag_id):
     """ """
     ...
-
-
-def delete_file(user_id, file_id):
-    file = File.objects.filter(id=file_id).first()
-    if file.owner_user.id != user_id:
-        return file.serialize()
-    file.status = False
-    file.save()
-    return file.serialize()
 
 
 def create_like(dataset_id, user_id, data):

@@ -10,7 +10,6 @@ class Dataset(models.Model):
         "description",
         "addt_info",
     ]
-    __tablename__ = "Dataset"
     is_verified = models.BooleanField(default=False)
     has_user_policy = models.BooleanField(default=False)
     is_government = models.BooleanField(default=False)
@@ -39,8 +38,10 @@ class Dataset(models.Model):
     )
 
     # Many-to-Many Relationships
-    tags = models.ManyToManyField("DatasetTag", through="Dataset_DatasetTag")
-    files = models.ManyToManyField("DatasetFile", through="Dataset_DatasetFile")
+    tags = models.ManyToManyField("DatasetTag", through="RelDatasetDatasetTag")
+    files = models.ManyToManyField(
+        "DatasetFile", through="RelDatasetDatasetFile"
+    )
 
     def serialize(self):
         return {
@@ -85,6 +86,8 @@ class Dataset(models.Model):
 
 
 class DatasetMetadata(models.Model):
+    custom_fields = ["license_link", "source_link", "resource_type"]
+
     file = models.CharField(max_length=50, null=True)
     blurb = models.CharField(max_length=1000, blank=True, null=True)
     source_link = models.URLField(null=True)
@@ -111,20 +114,23 @@ class DatasetMetadata(models.Model):
 class DatasetFile(models.Model):
     title = models.CharField(max_length=50)
     url = models.CharField(max_length=50, default=None, blank=False)
-    status = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)
+    is_metadata = models.BooleanField(default=False)
+    uploader = models.ForeignKey(
+        "user.User",
+        on_delete=models.RESTRICT,
+        related_name="user_dataset_files",
+        default=None,
+    )
 
     def serialize(self):
         return {
             "id": self.id,
             "title": self.title,
             "url": self.url,
-            "status": self.status,
+            "active": self.active,
+            "is_metadata": self.is_metadata,
         }
-
-
-class Dataset_DatasetFile(models.Model):
-    files = models.ForeignKey("DatasetFile", on_delete=models.RESTRICT)
-    datasets = models.ForeignKey("Dataset", on_delete=models.RESTRICT)
 
 
 # TODO: consider situation where orgs and users are also tagged
@@ -173,14 +179,9 @@ class DatasetTag(models.Model):
         return {"id": self.id, "name": self.name}
 
 
-class Dataset_DatasetTag(models.Model):
-    tags = models.ForeignKey("DatasetTag", on_delete=models.RESTRICT)
-    datasets = models.ForeignKey("Dataset", on_delete=models.RESTRICT)
-
-
 class DatasetLike(models.Model):
     active = models.BooleanField(default=True)
-    user = models.ForeignKey(
+    author = models.ForeignKey(
         "user.User",
         on_delete=models.RESTRICT,
         default=None,
@@ -194,13 +195,13 @@ class DatasetLike(models.Model):
     )
 
     class Meta:
-        unique_together = ("user", "dataset")
+        unique_together = ("author", "dataset")
 
     def serialize(self):
         return {
             "id": self.id,
             "status": self.status,
-            "user": self.user.id,
+            "user": self.author.id,
             "dataset": self.dataset.id,
         }
 
@@ -230,3 +231,13 @@ class DatasetBookmark(models.Model):
             "user": self.user.id,
             "dataset": self.dataset.id,
         }
+
+
+class RelDatasetDatasetTag(models.Model):
+    tags = models.ForeignKey("DatasetTag", on_delete=models.RESTRICT)
+    datasets = models.ForeignKey("Dataset", on_delete=models.RESTRICT)
+
+
+class RelDatasetDatasetFile(models.Model):
+    files = models.ForeignKey("DatasetFile", on_delete=models.RESTRICT)
+    datasets = models.ForeignKey("Dataset", on_delete=models.RESTRICT)
