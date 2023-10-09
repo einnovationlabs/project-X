@@ -25,13 +25,13 @@ class Dataset(models.Model):
     addt_info = models.TextField(default=None)
 
     # Foreign Key Fields
-    owner_organization = models.ForeignKey(
+    organization = models.ForeignKey(
         "organization.Organization",
         on_delete=models.RESTRICT,
         default=None,
         null=True,
     )
-    owner_user = models.ForeignKey(
+    author = models.ForeignKey(
         "user.User", on_delete=models.RESTRICT, default=None
     )
     metadata = models.ForeignKey(
@@ -57,11 +57,11 @@ class Dataset(models.Model):
             "status": self.status,
             "is_deleted": self.is_deleted,
             "addt_info": self.addt_info,
-            "owner_user": f"{self.owner_user.firstname} {self.owner_user.lastname}"
-            if self.owner_user
+            "author": f"{self.author.firstname} {self.author.lastname}"
+            if self.author
             else "",
-            "owner_organization": self.owner_organization.serialize()
-            if self.owner_organization
+            "organization": self.organization.serialize()
+            if self.organization
             else "",
             "metadata": self.metadata.serialize(),
             "tags": [tag.serialize() for tag in self.tags.all()],
@@ -156,7 +156,7 @@ class DatasetComment(models.Model):
         return {
             "id": self.id,
             "body": self.body,
-            "status": self.status,
+            "active": self.active,
             "data_created": self.date_created,
         }
 

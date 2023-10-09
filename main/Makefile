@@ -1,15 +1,15 @@
 init:
-	pip3 install -r main/requirements.txt
-	touch main/.env
+	pip3 install -r requirements.txt
+	touch .env
 .PHONY: init
 
 run:
-	python3 main/manage.py runserver
+	python3 manage.py runserver
 .PHONY: run
 
 migrate:
-	python3 main/manage.py makemigrations
-	python3 main/manage.py migrate
+	python3 manage.py makemigrations
+	python3 manage.py migrate
 .PHONY: migrate
 
 clean:
@@ -18,5 +18,5 @@ clean:
 .PHONY: clean
 
 format:
-	./main/scripts/format.sh
+	./scripts/format.sh
 .PHONY: format

@@ -41,7 +41,9 @@ class User(models.Model):
             ],
             "likes": [like.serialize() for like in self.user_likes.all()],
             "comments": [
-                comment.serialize() for comment in self.user_comments.all()
+                comment.serialize()
+                for comment in self.user_comments.all()
+                if comment.active
             ],
             "roles": [role.serialize() for role in self.roles.all()],
             "tags": [tag.serialize() for tag in self.tags.all()],

@@ -2,7 +2,7 @@ import json
 
 import apps.organization.crud as organization_dao
 from django.views.decorators.csrf import csrf_exempt
-from utils import error_response, success_response
+from utils.response import error_response, success_response
 
 
 # Organization Management endpoints

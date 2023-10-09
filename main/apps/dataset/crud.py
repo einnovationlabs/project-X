@@ -21,17 +21,16 @@ from utils.errors import (
 
 def create_dataset(data, user_id):
     """
-    Creates dataset using `data` and sets user with id `user_id` as the author.
+    Creates dataset with `data` and sets user `user_id` as the author.
     """
-    owner = User.objects.filter(id=user_id).first()
-    if not owner:
+    author = User.objects.filter(id=user_id).first()
+    if not author:
         raise UserDoesNotExist
 
-    dataset = Dataset()
+    dataset = Dataset(author=author)
     for field in Dataset.custom_single_fields:
         setattr(dataset, field, data.get(field))
 
-    dataset.owner_user = owner
     dataset.metadata = create_dataset_metadata(user_id, data)
     dataset.save()
 
@@ -53,7 +52,7 @@ def read_dataset(dataset_id):
     dataset = Dataset.objects.get(id=dataset_id)
     if not dataset:
         raise DatasetDoesNotExist
-    return {"dataset": dataset}
+    return {"dataset": dataset.serialize()}
 
 
 def read_all_datasets():
@@ -151,7 +150,7 @@ def update_comment(comment_id, data):
     if not comment:
         raise CommentDoesNotExist
 
-    if body := data.get("message"):
+    if body := data.get("message") != "":
         comment.body = body
         comment.save()
         return {"comment": comment.serialize()}
@@ -165,7 +164,7 @@ def delete_comment(user_id, comment_id):
     comment = DatasetComment.objects.filter(id=comment_id).first()
     if comment.author != user_id:
         return UserNotAuthorized
-    comment.status = False
+    comment.active = False
     comment.save()
     return comment.serialize()
 

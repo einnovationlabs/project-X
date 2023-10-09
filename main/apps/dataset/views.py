@@ -4,8 +4,8 @@ import apps.dataset.crud as dataset_crud
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from utils import error_response
-from errors import UserDoesNotExist, DatasetDoesNotExist
+from utils.response import error_response
+from utils.errors import UserDoesNotExist, DatasetDoesNotExist
 
 
 @csrf_exempt
@@ -29,7 +29,7 @@ def get_dataset(request, dataset_id):
     return render(
         request,
         "pages/data/dataset.html",
-        {"dataset": dataset_crud.get_dataset(dataset_id=dataset_id)},
+        {"dataset": dataset_crud.read_dataset(dataset_id=dataset_id)},
     )
 
 
