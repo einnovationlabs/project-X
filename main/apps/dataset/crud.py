@@ -11,7 +11,12 @@ from apps.organization.crud import get_org
 from apps.user.models import User
 from utils.response import error_response
 from datetime import datetime
-from utils.errors import UserDoesNotExist, DatasetDoesNotExist
+from utils.errors import (
+    UserDoesNotExist,
+    DatasetDoesNotExist,
+    CommentDoesNotExist,
+    UserNotAuthorized,
+)
 
 
 def create_dataset(data, user_id):
@@ -87,6 +92,9 @@ def delete_dataset(dataset_id):
 
 
 def create_dataset_metadata(user_id, data):
+    """
+    Create metadata for dataset using `data`.
+    """
     date_created = date_modified = datetime.now()
     file = data.get("metadata_file")  # * Upload to S3 and store link here
 
@@ -110,8 +118,8 @@ def update_dataset_metadata(dataset_id, data):
         return None
 
     metadata = dataset.metadata
-    for field in DatasetMetadata.single_fields:
-        setattr(metadata, field, data.get(field))
+    for field, value in data.items():
+        setattr(metadata, field, value)
 
     metadata.save()
     dataset.save()
@@ -140,11 +148,14 @@ def update_comment(comment_id, data):
     Update comment with id `comment_id`.
     """
     comment = DatasetComment.objects.get(id=comment_id)
+    if not comment:
+        raise CommentDoesNotExist
+
     if body := data.get("message"):
         comment.body = body
         comment.save()
         return {"comment": comment.serialize()}
-    return delete_comment(user_id, comment_id)
+    return delete_comment(comment.author, comment_id)
 
 
 def delete_comment(user_id, comment_id):
@@ -152,8 +163,8 @@ def delete_comment(user_id, comment_id):
     Deletes comment with id `comment_id`.
     """
     comment = DatasetComment.objects.filter(id=comment_id).first()
-    if comment.owner_user.id != user_id:
-        return comment.serialize()
+    if comment.author != user_id:
+        return UserNotAuthorized
     comment.status = False
     comment.save()
     return comment.serialize()
