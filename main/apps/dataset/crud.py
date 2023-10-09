@@ -9,9 +9,9 @@ from apps.dataset.models import (
 )
 from apps.organization.crud import get_org
 from apps.user.models import User
-from utils import error_response
+from utils.response import error_response
 from datetime import datetime
-from errors import UserDoesNotExist, DatasetDoesNotExist
+from utils.errors import UserDoesNotExist, DatasetDoesNotExist
 
 
 def create_dataset(data, user_id):

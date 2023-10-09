@@ -4,7 +4,7 @@ import apps.user.crud as crud
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from utils import error_response, success_response
+from utils.response import error_response, success_response
 
 
 # Test endpoint
