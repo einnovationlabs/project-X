@@ -27,13 +27,9 @@ def get_dataset(request, dataset_id):
     Endpoint to get dataset by id
     """
     try:
-        # return render(
-        #     request,
-        #     "pages/data/dataset.html",
         return JsonResponse(
             {"dataset": dataset_crud.read_dataset(dataset_id=dataset_id)},
         )
-    # )
     except DatasetDoesNotExist:
         return error_response("Dataset does not exists")
 

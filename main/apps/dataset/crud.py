@@ -19,7 +19,7 @@ from utils.errors import (
 )
 
 
-def create_dataset(data, user_id):
+def create_dataset(data, user_id: int):
     """
     Creates dataset with `data` and sets user `user_id` as the author.
     """
@@ -229,7 +229,7 @@ def delete_like(like_id, user_id):
     """
     Deletes and Returns like by user
     """
-    like = Like.objects.get(id=like_id)
+    like = DatasetLike.objects.get(id=like_id)
     if like_id.owner_user.id != user_id:
         return like
 
